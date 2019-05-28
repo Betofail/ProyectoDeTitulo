@@ -23,10 +23,10 @@ class HomeController extends Controller
     public function index()
     {
         $user = Auth::user()->email;
-        $tipo = DB::connection('mysql')->table('tipos_cuentas')->where('email', $user)->value('tipo');
+        $tipo = DB::connection('mysql')->table('users')->where('email', $user)->value('tipo');
     
         if ($tipo == 'alumno') {
-
+                //datos para alumnos
             $this->rut = DB::connection('mysql')->table('alumno')->where('email',$user)->value('rut');
             $asignatura = DB::connection('mysql')->table('alumno_seccion')
             ->join('seccion_por_semestre',function($join)
@@ -53,8 +53,8 @@ class HomeController extends Controller
             //dd($asignatura,$campus_clinico);
 
         }else{
-
-            $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');
+                //datos para docentes
+            $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');//rut del docente
             $asignatura = DB::connection('mysql')->table('profesor_seccion')
             ->join('seccion_por_semestre',function($join)
             {
@@ -64,9 +64,10 @@ class HomeController extends Controller
             ->join('asignatura','seccion_por_semestre.Asignatura_idAsignatura', '=' , 'asignatura.idAsignatura')
             ->join('docente', 'profesor_seccion.Docente_idDocente','=','docente.idDocente')
             ->join('campus_decreto', 'asignatura.idAsignatura','=','campus_decreto.idAsignatura')
-            ->select('seccion_por_semestre.link_encuesta', 'asignatura.Nombre', 'asignatura.Semestre', 'docente.nombre')->get();
+            ->join('alumno_seccion','seccion_por_semestre.idRamo_seccion','=','alumno_seccion.nrc')
+            ->select('seccion_por_semestre.Periodo_idPeriodo','asignatura.idAsignatura','asignatura.Nombre','seccion_por_semestre.fecha_inicio_encuesta','seccion_por_semestre.fecha_termino_encuesta')->get();
 
-            $campus_clinico = DB::connection('mysql')->table('profesor_seccion')
+            /*$campus_clinico = DB::connection('mysql')->table('profesor_seccion')
             ->join('seccion_por_semestre',function($join)
             {
                 $join->on('profesor_seccion.Docente_idDocente','=','seccion_por_semestre.Docente_idDocente')
@@ -78,12 +79,12 @@ class HomeController extends Controller
             ->join('rotacion_por_semestre','campus_clinico_seccion.rotacion','=','rotacion_por_semestre.idCampus_Clinico')
             ->join('hospital','rotacion_por_semestre.Hospital_idHospital','=','hospital.idHospital')
             ->select('asignatura.nombre','seccion_por_semestre.link_encuesta','rotacion_por_semestre.fecha_inicio','rotacion_por_semestre.fecha_termino','hospital.nombre_hospital')
-            ->get();
+            ->get();*/
 
-            //dd($asignatura,$campus_clinico);
+            dd($asignatura,$this->rut);
 
         }
 
-        return view('home',['asignatura' => $asignatura,'campus_clinico' => $campus_clinico]);
+        //return view('home',['asignatura' => $asignatura,'campus_clinico' => $campus_clinico]);
     }
 }
