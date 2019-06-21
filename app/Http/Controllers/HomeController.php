@@ -54,7 +54,10 @@ class HomeController extends Controller
             //return view('alumno_home',['asignatura' => $asignatura,
             //'campus_clinico' => $campus_clinico]);
 
-        }else{
+            return view('home');
+
+        }else if ($tipo == 'docente') {
+            
                 //datos para docentes
             $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');//rut del docente
             $asignatura = DB::connection('mysql')->table('seccion_por_semestre')
@@ -187,6 +190,9 @@ class HomeController extends Controller
             'contador_docentes_clinicos' => $contador_docentes_clinicos,
             'rotaciones' => $rotaciones,
             'contador_rotaciones' => $contador_rotaciones]);
+        }
+        else if ($tipo == 'SA') {
+            
         }
     }
 }
