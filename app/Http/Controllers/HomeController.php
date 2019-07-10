@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Redirect;
 
 class HomeController extends Controller
 {
@@ -22,6 +24,10 @@ class HomeController extends Controller
 
     public function index()
     {
+        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_USER', 'Alberto' );
+        define( 'LS_PASSWORD', 'oviedo83' );
+
         $periodos = DB::connection('mysql')->table('periodo')
             ->where('estado','>','1')->get()->toArray();
 
@@ -76,13 +82,55 @@ class HomeController extends Controller
             ->groupBy('campus_clinico_seccion.link_encuesta','seccion_por_semestre.Periodo_idPeriodo','campus_clinico_seccion.nrc','campus_decreto.nombre_asignatura','hospital.nombre_hospital','rotacion_por_semestre.fecha_inicio','rotacion_por_semestre.fecha_termino','rotacion_por_semestre.fecha_inicio_encuesta','docente.nombre')
             ->select(DB::raw('count(campus_clinico_seccion.alumno_seccion) as numero_alumno'),'campus_clinico_seccion.link_encuesta','seccion_por_semestre.Periodo_idPeriodo','campus_clinico_seccion.nrc','campus_decreto.nombre_asignatura','hospital.nombre_hospital','rotacion_por_semestre.fecha_inicio','rotacion_por_semestre.fecha_termino','rotacion_por_semestre.fecha_inicio_encuesta','docente.nombre')->get();
 
+        $surveys_ids = [];
+        $count = 0;
+        $estatus = [];
+
+            foreach ($asignatura as $key => $value) {
+                if ($value->link_encuesta == 'none') {
+                    continue;
+                }else{
+                    $survey_id= Str::before($value->link_encuesta,'?');
+                    $survey_id = Str::after($survey_id,'http://limesurvey.test/index.php/');
+
+                    $surveys_ids[$count] = ['id' => $survey_id, 'nrc' => $value->numero_seccion];
+                    $count++;
+                }
+            }
+
+        // instantiate a new client
+        $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient( LS_BASEURL.'/admin/remotecontrol' );
+
+        // receive session key
+        $sessionKey= $myJSONRPCClient->get_session_key( LS_USER, LS_PASSWORD );
+
+        $users = [array('email' => Auth::user()->email)];
+
+        $attributes = ["completed","usesleft"];
+
+        $count = 0;
+
+        foreach ($surveys_ids as $key => $value) {
+            $list_participants = $myJSONRPCClient->list_participants($sessionKey,$value['id'],0,100,false,$attributes,$users);
+            if(!isset($list_participants[0])){
+                continue;
+            }else{
+                $estatus[$count] = ['nrc' => $value['nrc'], 'estado' => $list_participants[0]['completed']];
+                $count++;
+            }
+        }
+    
+        $myJSONRPCClient->release_session_key( $sessionKey );
+
+
         return view('home',[
             'tipo' => $tipo,
             'periodos' => $periodos,
             'code_periodo' =>$this->periodos,
             'campus_clinico' => $campus_clinico,
             'asignatura' => $asignatura,
-            'rotaciones' => $rotaciones]);
+            'rotaciones' => $rotaciones,
+            'estados' => $estatus]);
 
         }else if ($tipo == 'PA') {
 
@@ -1300,6 +1348,43 @@ class HomeController extends Controller
             'entrego_rubrica' => $entregas_rubrica,
             'rotaciones_rubrica' => $rotaciones_rubrica]); 
         
+    }
+
+    public function encuesta(Request $request)
+    {
+        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_USER', 'Alberto' );
+        define( 'LS_PASSWORD', 'oviedo83' );
+
+        $this->rut = DB::connection('mysql')->table('alumno')->where('email',Auth::user()->email)->value('rut');
+
+        $this->rut = substr((string)$this->rut,0,4);
+        // the survey to process
+        $url = $request->query('url');
+
+        $survey_id= Str::before($url,'?');
+        $survey_id = Str::after($survey_id,'http://limesurvey.test/index.php/');
+
+        // instantiate a new client
+        $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient( LS_BASEURL.'/admin/remotecontrol' );
+
+        // receive session key
+        $sessionKey= $myJSONRPCClient->get_session_key( LS_USER, LS_PASSWORD );
+
+        // receive surveys list current user can read
+        $groups = $myJSONRPCClient->list_surveys( $sessionKey );
+
+        $users = [array('email' => Auth::user()->email, 'token' => $this->rut)];
+
+        $attributes = ["completed","usesleft"];
+
+        $adding_participants = $myJSONRPCClient->add_participants($sessionKey,$survey_id,$users,false);
+
+        //dd($groups,$users,$url,$survey_id,$adding_participants,$this->rut);
+        // release the session key
+        $myJSONRPCClient->release_session_key( $sessionKey );
+
+        return Redirect::to($url);
     }
 }
 

@@ -24,3 +24,5 @@ Route::get('/home/PA/{id}','HomeController@periodo_pa')->name('periodo_pa');
 Route::get('/home/Sa/{id}','HomeController@peridos_sa')->name('periodo_sa');
 
 Route::get('/home/docente/{id}','HomeController@periodo_docente')->name('periodo_doc');
+
+Route::get('/home/alumno/','HomeController@encuesta')->name('fun_encuesta');

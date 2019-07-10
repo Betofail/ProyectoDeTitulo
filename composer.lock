@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e22216cf356f98028dbda7bbd567537b",
+    "content-hash": "7d1519a1d541fe2c8abf61b5169374a5",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -2632,6 +2632,55 @@
                 "environment"
             ],
             "time": "2019-03-06T09:39:45+00:00"
+        },
+        {
+            "name": "weberhofer/jsonrpcphp",
+            "version": "2.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/weberhofer/jsonrpcphp.git",
+                "reference": "e1a79bb3f08e20ae04e1e32deaff6a32eed4dad2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/weberhofer/jsonrpcphp/zipball/e1a79bb3f08e20ae04e1e32deaff6a32eed4dad2",
+                "reference": "e1a79bb3f08e20ae04e1e32deaff6a32eed4dad2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "org\\jsonrpcphp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "Johannes Weberhofer",
+                    "email": "jweberhofer@weberhofer.at",
+                    "homepage": "http://www.weberhofer.at",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Sergio Vaccaro",
+                    "email": "info@jsonrpcphp.org",
+                    "homepage": "http://jsonrpcphp.org/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "JSON-RPC for PHP 5.3+",
+            "homepage": "https://github.com/weberhofer/jsonrpcphp",
+            "keywords": [
+                "json",
+                "rpc"
+            ],
+            "time": "2015-07-08T05:49:59+00:00"
         }
     ],
     "packages-dev": [
