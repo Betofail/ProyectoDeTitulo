@@ -65,7 +65,15 @@
                             <td>{{$value->fecha_termino_encuesta}}</td>
                             <td>{{$value->actividad}}</td>
                             @if($tipo == 'alumno')
-                                <td><a href="{{$value->link_encuesta}}">{{$value->link_encuesta}}</a></td>
+                                @foreach($estados as $key_st => $value_st)
+                                    @if($value_st['nrc'] == $value->numero_seccion && $value_st['estado'] == "N")
+                                        <td><a href="{{action('HomeController@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{$value->link_encuesta}}</a></td>
+                                    @elseif($value_st['nrc'] == $value->numero_seccion && $value_st['estado'] != "N")
+                                        <td>Completado el :{{$value_st['estado']}}</td>
+                                    @else
+                                        
+                                    @endif
+                                @endforeach
                             @else
                                 @if($cantidad_teoricos->isEmpty())
                                     <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">

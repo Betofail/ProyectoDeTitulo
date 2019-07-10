@@ -328,6 +328,13 @@ class ComposerStaticInit5ae96ebfefd4d06c458f458978ae1a72
     );
 
     public static $prefixesPsr0 = array (
+        'o' => 
+        array (
+            'org\\jsonrpcphp\\' => 
+            array (
+                0 => __DIR__ . '/..' . '/weberhofer/jsonrpcphp/src',
+            ),
+        ),
         'P' => 
         array (
             'Prophecy\\' => 
@@ -3819,6 +3826,8 @@ class ComposerStaticInit5ae96ebfefd4d06c458f458978ae1a72
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
         'XdgBaseDir\\Xdg' => __DIR__ . '/..' . '/dnoegel/php-xdg-base-dir/src/Xdg.php',
+        'org\\jsonrpcphp\\JsonRPCClient' => __DIR__ . '/..' . '/weberhofer/jsonrpcphp/src/org/jsonrpcphp/JsonRPCClient.php',
+        'org\\jsonrpcphp\\JsonRPCServer' => __DIR__ . '/..' . '/weberhofer/jsonrpcphp/src/org/jsonrpcphp/JsonRPCServer.php',
         'phpDocumentor\\Reflection\\DocBlock' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlock.php',
         'phpDocumentor\\Reflection\\DocBlockFactory' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactory.php',
         'phpDocumentor\\Reflection\\DocBlockFactoryInterface' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactoryInterface.php',
