@@ -70,8 +70,8 @@
                                         <td><a href="{{action('HomeController@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{$value->link_encuesta}}</a></td>
                                     @elseif($value_st['nrc'] == $value->numero_seccion && $value_st['estado'] != "N")
                                         <td>Completado el :{{$value_st['estado']}}</td>
-                                    @else
-                                        
+                                    @elseif(is_null($value->link_encuesta))
+                                        <td>no tiene encuesta</td>
                                     @endif
                                 @endforeach
                             @else
@@ -85,7 +85,7 @@
                                     @else
                                         @foreach($respuestas_teoricas as $key_resp => $val_resp)
                                             @if($val_resp->numero_seccion == $cant_val->numero_seccion && $cant_val->actividad == $val_resp->actividad)
-                                                <td>{{($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100}}</td>
+                                                <td>{{number_format(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100,2)}}</td>
                                             @else
                                                 <td>0</td>
                                             @endif
@@ -124,7 +124,7 @@
                                             @else
                                                 @foreach($respuestas_teoricas as $key_resp => $val_resp)
                                                     @if($val_resp->numero_seccion == $cant_val->numero_seccion && $cant_val->actividad == $val_resp->actividad)
-                                                        <td>{{($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100}}</td>
+                                                        <td>{{number_format(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100,2)}}</td>
                                                     @else
                                                         <td>0</td>
                                                     @endif
@@ -195,7 +195,7 @@
                                     @else
                                         @foreach($respuestas_clinicas as $cli_key => $cli_val)
                                             @if($cli_val->nrc == $value->nrc)
-                                                <td>{{($cli_val->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100}}</td>
+                                                <td>{{number_format(($cli_val->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}</td>
                                             @else
 
                                             @endif
@@ -207,7 +207,7 @@
                                     @else
                                         @foreach($entrego_rubrica as $cli_ent_key => $cli_ent_val)
                                             @if($cli_ent_val->nrc == $value->nrc)
-                                                <td>{{($cli_ent_val->entrego_rubrica / $contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100}}</td>
+                                                <td>{{number_format(($cli_ent_val->entrego_rubrica / $contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}</td>
                                             @else
                                                 
                                             @endif
@@ -235,7 +235,7 @@
                                         @else
                                             @foreach($respuestas_clinicas as $key_resp_cli => $val_resp_cli)
                                                 @if($val_resp_cli->nrc == $value->nrc)
-                                                    <td>{{($respuestas_clinicas[$key]->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100}}</td>
+                                                    <td>{{number_format(($respuestas_clinicas[$key]->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}</td>
                                                 @else
                                                     
                                                 @endif
@@ -298,7 +298,7 @@
                                                     @else
                                                         @foreach($respuestas_rotaciones as $resp_key => $resp_value)
                                                             @if($resp_value->rotacion == $value_rot->rotacion && $resp_value->nrc == $value_rot->nrc)
-                                                                <td>{{($resp_value->resp_encuesta / $value_rot->numero_alumno) * 100}}</td>
+                                                                <td>{{number_format(($resp_value->resp_encuesta / $value_rot->numero_alumno) * 100,2)}}</td>
                                                             @else
                                                                 
                                                             @endif
@@ -309,7 +309,7 @@
                                                     @else
                                                         @foreach($rotaciones_rubrica as $rot_rub_key => $rot_rub_value)
                                                             @if($rot_rub_value->rotacion == $value_rot->rotacion && $rot_rub_value->nrc == $value_rot->nrc)
-                                                                <td>{{($rot_rub_value->entrego_rubrica / $value_rot->numero_alumno) * 100}}</td>
+                                                                <td>{{number_format(($rot_rub_value->entrego_rubrica / $value_rot->numero_alumno) * 100,2)}}</td>
                                                             @else
                                                                 
                                                             @endif
