@@ -24,10 +24,7 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light navbar-laravel">
             <div class="container">
-                <img src="/image/logo_unab_icono.png">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    Plataforma MediUNAB
-                </a>
+                <img src="/image/logo_unab_icono.png"> Plataforma MediUNAB
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -52,10 +49,10 @@
                             @endif
                         @else
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Enviar Mensaje</a>
+                               <a class="nav-link" href="{{route('home')}}">Home</a> 
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Notificaciones<span class="badge">1</span></a>
+                                <a class="nav-link" href="{{route('notificacion')}}">Notificaciones<span class="badge">1</span></a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
@@ -81,6 +78,8 @@
 
         <main class="py-4">
             <div class="bg-image"></div>
+             @include('flash-message')
+
             @yield('content')
                 
         </main>

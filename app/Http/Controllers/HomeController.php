@@ -104,14 +104,14 @@ class HomeController extends Controller
         // receive session key
         $sessionKey= $myJSONRPCClient->get_session_key( LS_USER, LS_PASSWORD );
 
-        $users = [array('email' => Auth::user()->email)];
+        $aConditions = array('email' => Auth::user()->email);
 
         $attributes = ["completed","usesleft"];
 
         $count = 0;
 
         foreach ($surveys_ids as $key => $value) {
-            $list_participants = $myJSONRPCClient->list_participants($sessionKey,$value['id'],0,100,false,$attributes,$users);
+            $list_participants = $myJSONRPCClient->list_participants($sessionKey,$value['id'],0,100,false,$attributes,$aConditions);
             if(!isset($list_participants[0])){
                 continue;
             }else{
@@ -119,7 +119,7 @@ class HomeController extends Controller
                 $count++;
             }
         }
-    
+        
         $myJSONRPCClient->release_session_key( $sessionKey );
 
 
