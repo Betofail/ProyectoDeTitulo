@@ -12,9 +12,9 @@ class NotificationController extends Controller
 {
      public function index()
    {
-   	$users = User::where('id','!=',Auth::user()->id)->get();
+   	$users = User::where('id','!=',Auth::user()->id)->whereIn('tipo',['SA','PA','docente'])->get();
       $query = DB::table('notifications')->select('sender_id','body','created_at')
-      ->where('receptor_id','=',Auth::user()->id)->get();
+      ->where([['receptor_id','=',Auth::user()->id]])->get();
       $emisores = [];
 
       $tipo = Auth::user()->tipo;
@@ -39,6 +39,69 @@ class NotificationController extends Controller
    	 	 'body'=>$request->body
    	 ]);
 
-   	 return back()->with('success' , 'se envio la notificacion');
+   	return back()->with('success' , 'se envio la notificacion');
    }
+
+   public function encuestas(Request $request)
+    {
+      if($request->tipo_encuesta == 'clinica'){
+         $alumnos_clinicos = DB::table('campus_clinico_seccion')
+         ->where([['rotacion',$request->id_rotacion],['seccion_semestre',$request->seccion_semestre]])
+         ->join('alumno_seccion','campus_clinico_seccion.seccion_semestre','=','alumno_seccion.nrc')->select('alumno_seccion.rut_alumno')->distinct()->get();
+
+         $docentes_clinicos = DB::table('campus_clinico_seccion')
+          ->where([['rotacion',$request->id_rotacion],['seccion_semestre',$request->seccion_semestre]])
+          ->join('profesor_seccion','campus_clinico_seccion.idProfesor_seccion','=','profesor_seccion.idProfesor_Campus_clinico')
+          ->select('profesor_seccion.Docente_idDocente')->distinct()->get();
+
+         DB::table('campus_clinico_seccion')
+         ->where([['rotacion',$request->id_rotacion],['seccion_semestre',$request->seccion_semestre]])
+         ->update(['link_encuesta' => $request->link]);
+
+         foreach ($alumnos_clinicos as $key => $alumno) {
+            Notification::create([
+               'sender_id' => Auth::user()->id,
+               'receptor_id' => $alumno->rut_alumno,
+               'body' => "se envio la encuesta para la asignatura ".$request->nombre." para la rotacion numero ".$request->id_rotacion." nrc: ".$request->nrc 
+            ]);
+         }
+
+         foreach ($docentes_clinicos as $key => $docente) {
+            Notification::create([
+               'sender_id' => Auth::user()->id,
+               'receptor_id' => $docente->Docente_idDocente,
+               'body' => "se envio la encuesta para la asignatura ".$request->nombre." para la rotacion numero ".$request->id_rotacion." nrc: ".$request->nrc
+            ]);
+         }
+      }
+      else{
+         $alumnos = DB::table('seccion_por_semestre')->where([['Asignatura_idAsignatura',$request->id],['actividad',$request->tipo_asig]])
+         ->join('alumno_seccion','seccion_por_semestre.idRamo_seccion','=','alumno_seccion.nrc')
+         ->select('alumno_seccion.rut_alumno')->get();
+
+         $docentes = DB::table('seccion_por_semestre')->where([['Asignatura_idAsignatura',$request->id],['actividad',$request->tipo_asig]])
+         ->select('Docente_idDocente')->get();
+
+
+         DB::table('seccion_por_semestre')->where([['Asignatura_idAsignatura',$request->id],
+         ['actividad',$request->tipo_asig]])->update(['link_encuesta' => $request->link]);
+
+         foreach ($alumnos as $key => $alumno) {
+            Notification::create([
+               'sender_id' => Auth::user()->id,
+               'receptor_id' => $alumno->rut_alumno,
+               'body' => "se envio la encuesta para la asignatura ".$request->nombre
+            ]);
+         }
+
+         foreach ($docentes as $key => $docente) {
+            Notification::create([
+               'sender_id' => Auth::user()->id,
+               'receptor_id' => $docente->Docente_idDocente,
+               'body' => "se envio la encuesta para la asignatura ".$request->nombre
+            ]);
+         }
+      }
+      return back()->with('success' , 'se ingreso correctamente la encuesta y se envio la notificacion'); 
+    }
 }

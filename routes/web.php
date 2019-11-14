@@ -11,17 +11,19 @@
 |
 */
 
+use Illuminate\Support\Facades\Route;
+
 Route::get('/', function () {
     return view('auth/login');
 });
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/home', 'home2@index')->name('home');
 
-Route::get('/home/PA/{id}','HomeController@periodo_pa')->name('periodo_pa');
+Route::get('/home/PA/{id}','home2@periodos_PA')->name('periodo_pa');
 
-Route::get('/home/Sa/{id}','HomeController@peridos_sa')->name('periodo_sa');
+Route::get('/home/Sa/{id}','home2@periodos_SA')->name('periodo_sa');
 
 Route::get('/home/docente/{id}','HomeController@periodo_docente')->name('periodo_doc');
 
@@ -30,3 +32,17 @@ Route::get('/home/alumno/','HomeController@encuesta')->name('fun_encuesta');
 Route::get('/notification','NotificationController@index')->name('notificacion');
 
 Route::post('/notification','NotificationController@enviar')->name('notification.enviar');
+
+Route::post('/home','NotificationController@encuestas')->name('encuestas');
+
+Route::get('/enlace','EnlaceController@index')->name('enlace');
+Route::get('/encuesta_enlace/{id}','EnlaceController@tipo_encuesta')->name('cambio_encuesta');
+
+Route::post('change_enc','EnlaceController@enlasar_encuesta')->name('asignar_encuestas');
+
+Route::get('/cargador','CargadorController@index')->name('cargador');
+Route::get('export','CargadorController@export')->name('export');
+Route::post('import_alu','CargadorController@import')->name('import_alu');
+Route::post('import_sec','CargadorController@import_secction')->name('import_sec');
+Route::post('import_asing','CargadorController@import_asignatura')->name('import_asing');
+Route::post('import_docente','CargadorController@import_docente')->name('import_docente');

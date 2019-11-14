@@ -23,7 +23,7 @@
 		</div>
 		</div>
 	</div>
-@else
+@elseif($tipo == 'OFEM' or $tipo == 'PA' or $tipo == 'SA')
 	<div class="container">
 		<div class="col">
 		<div class="card text-center">
@@ -61,6 +61,28 @@
 			</ul>
 			@endforeach
 			@endif
+		</div>
+		</div>
+	</div>
+
+@else
+	<div class="container-fluid">
+		<div class="row">
+		<div class="col-lg-2"></div>
+		<div class="col-lg-8">
+			<div class="card text-center">
+				@if(is_null($emisores))
+				<h6 class="card-subtitle"> no tiene notificaciones</h6>
+				@else
+				@foreach($emisores as $value)
+				 <ul class="list-group list-group-flush">
+					<li class="list-group-item"><h5 class="card-title">Notificacion de {{$value['name']}}</h5>
+					<h6 class="card-subtitle mb-2 text-muted">Fecha: {{$value['created_at']}}</h6>
+					<p class="card-text">{{$value['body']}}</p></li>
+				</ul>
+				@endforeach
+				@endif
+			</div>
 		</div>
 		</div>
 	</div>

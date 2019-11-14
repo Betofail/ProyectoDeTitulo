@@ -93,10 +93,10 @@
                                     @endif
 
                                 @elseif($tipo == 'alumno')
-                                    
+
                                 @else
                                     @foreach($cantidad_teoricos as $cant_key => $cant_val)
-                                        @if($cant_val->numero_seccion == $value->numero_seccion 
+                                        @if($cant_val->numero_seccion == $value->numero_seccion
                                             && $cant_val->actividad == $value->actividad)
                                         <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">
                                             <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
@@ -145,7 +145,7 @@
 <!--Asignaturas Campus Clinicos -->
 
                     @if($campus_clinico->isEmpty())
-                        <h2>Campus Clinicos (Sin Carga Académica)</h2>                    
+                        <h2>Campus Clinicos (Sin Carga Académica)</h2>
                     @else
                         <table class="table table-responsive" width="100%" cellspacing="0">
                             <h2>Campus Clinicos</h2>
@@ -209,13 +209,13 @@
                                             @if($cli_ent_val->nrc == $value->nrc)
                                                 <td>{{number_format(($cli_ent_val->entrego_rubrica / $contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}</td>
                                             @else
-                                                
+
                                             @endif
                                         @endforeach
                                     @endif
                                 @else
                                     @if($tipo == 'alumno')
-                                        
+
                                         <td data-toggle="collapse" data-target="#acrodion{{$key}}" class="accordion-toggle"><button class="btn btn-default"><i class="fas fa-arrow-circle-down"></i></button></td>
                                     @else
                                         <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_alu{{$key}}">
@@ -237,7 +237,7 @@
                                                 @if($val_resp_cli->nrc == $value->nrc)
                                                     <td>{{number_format(($respuestas_clinicas[$key]->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}</td>
                                                 @else
-                                                    
+
                                                 @endif
                                             @endforeach
                                         @endif
@@ -300,7 +300,7 @@
                                                             @if($resp_value->rotacion == $value_rot->rotacion && $resp_value->nrc == $value_rot->nrc)
                                                                 <td>{{number_format(($resp_value->resp_encuesta / $value_rot->numero_alumno) * 100,2)}}</td>
                                                             @else
-                                                                
+
                                                             @endif
                                                         @endforeach
                                                     @endif
@@ -311,7 +311,7 @@
                                                             @if($rot_rub_value->rotacion == $value_rot->rotacion && $rot_rub_value->nrc == $value_rot->nrc)
                                                                 <td>{{number_format(($rot_rub_value->entrego_rubrica / $value_rot->numero_alumno) * 100,2)}}</td>
                                                             @else
-                                                                
+
                                                             @endif
                                                         @endforeach
                                                     @endif
@@ -334,7 +334,7 @@
 
 <!--Fin Asignaturas Campus Clinicos -->
 
-@if($tipo == 'SA' or $tipo =='alumno' or $tipo == 'docente')
+@if($tipo == 'SA' or $tipo =='alumno' or $tipo == 'docente' or $tipo == 'OFEM')
 
 @else
     @foreach($asignatura as $key => $value)
@@ -374,8 +374,8 @@
             </div>
         </div>
     @endforeach
-    
-    @foreach($campus_clinico as $key => $value)    
+
+    @foreach($campus_clinico as $key => $value)
     <!-- Modal Campus Clinico Alumnos -->
         <div id="campus_alu{{$key}}" class="modal fade" role="dialog">
             <div class="modal-dialog modal-sm">
@@ -411,7 +411,7 @@
         </div>
     @endforeach
 
-    @foreach($campus_clinico as $key => $value)    
+    @foreach($campus_clinico as $key => $value)
     <!-- Modal Campus Clinico Docentes -->
         <div id="campus_doc{{$key}}" class="modal fade" role="dialog">
             <div class="modal-dialog modal-sm">
@@ -433,7 +433,7 @@
                                     <tr>
                                         <td>{{$value_doc->idDocente}}</td>
                                         <td>{{$value_doc->nombre}}</td>
-                                        
+
                                     </tr>
                                 @endif
                                 @endforeach
@@ -448,7 +448,7 @@
         </div>
     @endforeach
 
-    @foreach($campus_clinico as $key => $value)    
+    @foreach($campus_clinico as $key => $value)
     <!-- Modal Campus Clinico Rotaciones -->
         <div id="rotaciones{{$key}}" class="modal fade" role="dialog">
             <div class="modal-dialog modal-lg">
@@ -461,7 +461,7 @@
                     <div class="modal-body">
                         <table class="table table-responsive">
                             <thead>
-                                
+
                                 <th>NRC</th>
                                 <th>N° Rotacion</th>
                                 <th>Asignatura</th>
@@ -475,7 +475,7 @@
                                 @foreach($rotaciones as $key_rotaciones => $value_rot)
                                 @if($value_rot->nrc == $value->nrc)
                                     <tr>
-                                       
+
                                         <td>{{$value_rot->nrc}}</td>
                                         <td>{{$key_rotaciones + 1}}</td>
                                         <td>{{$value_rot->nombre_asignatura}}</td>

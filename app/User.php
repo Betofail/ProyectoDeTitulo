@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use Notifiable;
+    protected $connection = 'mysql3';
 
     /**
      * The attributes that are mass assignable.
