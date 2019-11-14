@@ -11,6 +11,8 @@
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    @yield('script')
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -49,7 +51,7 @@
                             @endif
                         @else
                             <li class="nav-item">
-                               <a class="nav-link" href="{{route('home')}}">Home</a> 
+                               <a class="nav-link" href="{{route('home')}}">Home</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{route('notificacion')}}">Notificaciones<span class="badge">1</span></a>
@@ -59,6 +61,11 @@
                                     {{ Auth::user()->name }} <span class="caret"></span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                    @if(Auth::user()->tipo == 'SA')
+                                    <a class="dropdown-item" href="{{route('cargador')}}">Programación</a>
+                                    @elseif(Auth::user()->tipo == 'OFEM')
+                                <a class="dropdown-item" href="{{route('enlace')}}">Cargar Encuesta</a>
+                                    @endif
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
@@ -78,10 +85,10 @@
 
         <main class="py-4">
             <div class="bg-image"></div>
-             @include('flash-message')
+            @include('flash-message')
 
             @yield('content')
-                
+
         </main>
     </div>
 </body>

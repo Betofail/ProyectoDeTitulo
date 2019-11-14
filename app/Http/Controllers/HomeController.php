@@ -32,13 +32,14 @@ class HomeController extends Controller
             ->where('estado','>','1')->get()->toArray();
 
         $this->periodos = $periodos[0]->codigo_periodo;
-            
+
         $user = Auth::user()->email;
         $tipo = DB::connection('mysql')->table('users')->where('email', $user)->value('tipo');
-    
+
         if ($tipo == 'alumno') {
                 //datos para alumnos
             $this->rut = DB::connection('mysql')->table('alumno')->where('email',$user)->value('rut');
+
             $asignatura = DB::connection('mysql')->table('alumno_seccion')
             ->join('seccion_por_semestre',function($join)
             {
@@ -119,7 +120,7 @@ class HomeController extends Controller
                 $count++;
             }
         }
-        
+
         $myJSONRPCClient->release_session_key( $sessionKey );
 
 
@@ -138,10 +139,10 @@ class HomeController extends Controller
             ->where('estado','>','1')->get()->toArray();
 
             $this->periodos = $periodos[0]->codigo_periodo;
-            
+
                 //datos para docentes
             $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');//rut del docente
-            
+
              $asignatura = DB::connection('mysql')->table('seccion_por_semestre')
             ->join('asignatura',function($join)
             {
@@ -226,7 +227,7 @@ class HomeController extends Controller
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$this->periodos)
             ->select(DB::raw('count(distinct(alumno.rut)) as cant_alumnos_cli')
                 ,'campus_clinico_seccion.nrc')->get();
-            
+
             $respuestas_clinicas = DB::connection('mysql')->table('seccion_por_semestre')
              ->join('campus_clinico_seccion',function($join)
             {
@@ -372,7 +373,7 @@ class HomeController extends Controller
 
             //Asignaturas Teoricas
             $asignatura = DB::connection('mysql')->table('seccion_por_semestre')
-           
+
             ->join('asignatura','seccion_por_semestre.Asignatura_idAsignatura', '=' , 'asignatura.idAsignatura')
             ->orderBy('seccion_por_semestre.numero_seccion')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$this->periodos)
@@ -382,7 +383,7 @@ class HomeController extends Controller
             $contador_alumnos = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -392,7 +393,7 @@ class HomeController extends Controller
             $respuestas_teoricas = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -406,7 +407,7 @@ class HomeController extends Controller
            ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('campus_decreto','seccion_por_semestre.Asignatura_idAsignatura','=','campus_decreto.idAsignatura')
             ->orderBy('campus_clinico_seccion.nrc')
@@ -419,7 +420,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -431,7 +432,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->groupBy('campus_clinico_seccion.nrc')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$this->periodos)
@@ -441,7 +442,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-               
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -455,7 +456,7 @@ class HomeController extends Controller
             ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('profesor_seccion','campus_clinico_seccion.idProfesor_seccion','profesor_seccion.idProfesor_Campus_clinico')
             ->join('docente','docente.idDocente','=','profesor_seccion.Docente_idDocente')
@@ -521,18 +522,18 @@ class HomeController extends Controller
 
             //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
             //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
-            
+
             return view('home',[
             'tipo' => $tipo,
             'periodos' => $periodos,
             'code_periodo' =>$this->periodos,
             'asignatura' => $asignatura,
-            
+
             'cantidad_teoricos' => $contador_alumnos,
-            
+
             'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
             'campus_clinico' => $campus_clinico,
-            
+
             'contador_docentes_clinicos' => $contador_docentes_clinicos,
             'rotaciones' => $rotaciones,
             'contador_rotaciones' => $contador_rotaciones,
@@ -548,7 +549,7 @@ class HomeController extends Controller
             ->where('estado','>','1')->get()->toArray();
 
             $this->periodos = $periodos[0]->codigo_periodo;
-            
+
             //datos para docentes
             $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');//rut del docente
 
@@ -562,7 +563,7 @@ class HomeController extends Controller
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$this->periodos)
             ->select('seccion_por_semestre.Periodo_idPeriodo','seccion_por_semestre.numero_seccion','asignatura.Nombre','seccion_por_semestre.actividad','seccion_por_semestre.fecha_inicio_encuesta','seccion_por_semestre.fecha_termino_encuesta')->get();
 
-            //seccion Alumnos Teoricos 
+            //seccion Alumnos Teoricos
             $contador_alumnos = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc')
@@ -572,7 +573,7 @@ class HomeController extends Controller
             ->orderBy('seccion_por_semestre.numero_seccion')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$this->periodos)
             ->select(DB::raw('count(alumno_seccion.nrc) as cantidad_seccion'),'seccion_por_semestre.numero_seccion','seccion_por_semestre.actividad')->get();
-            
+
 
             //datos Campus clinico Docente
             $campus_clinico = DB::connection('mysql')->table('rotacion_por_semestre')
@@ -646,7 +647,7 @@ class HomeController extends Controller
             $respuestas_teoricas = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -703,7 +704,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-               
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -714,7 +715,7 @@ class HomeController extends Controller
                 ['profesor_seccion.Docente_idDocente','=',$this->rut]])
             ->select(DB::raw('count(campus_clinico_seccion.res_encuesta) as resp_encuesta')
                 ,'campus_clinico_seccion.nrc')->get();
-            
+
         //dd($contador_alumnos_clinicos);
         //dd($campus_clinico,$alumnos_clinicos,$docentes_clinicos,$contador_rotaciones,$rotaciones);
         //dd($docentes_clinicos,$contador_rotaciones,$rotaciones);
@@ -737,8 +738,8 @@ class HomeController extends Controller
             'respuestas_clinicas' => $respuestas_clinicas,
             'respuestas_rotaciones' => $respuestas_rotaciones,
             'entrego_rubrica' => $entregas_rubrica,
-            'rotaciones_rubrica' => $rotaciones_rubrica]);        
-        }  
+            'rotaciones_rubrica' => $rotaciones_rubrica]);
+        }
     }
 
     public function periodo_pa($id)
@@ -748,7 +749,7 @@ class HomeController extends Controller
         $periodos = DB::connection('mysql')->table('periodo')->where('estado','>','0')->get()->toArray();
 
             $this->rut = DB::connection('mysql')->table('docente')->where('email',$user)->value('idDocente');//rut del docente
-            
+
              $asignatura = DB::connection('mysql')->table('seccion_por_semestre')
             ->join('asignatura',function($join)
             {
@@ -833,7 +834,7 @@ class HomeController extends Controller
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$id)
             ->select(DB::raw('count(distinct(alumno.rut)) as cant_alumnos_cli')
                 ,'campus_clinico_seccion.nrc')->get();
-            
+
             $respuestas_clinicas = DB::connection('mysql')->table('seccion_por_semestre')
              ->join('campus_clinico_seccion',function($join)
             {
@@ -980,7 +981,7 @@ class HomeController extends Controller
 
              //Asignaturas Teoricas
             $asignatura = DB::connection('mysql')->table('seccion_por_semestre')
-           
+
             ->join('asignatura','seccion_por_semestre.Asignatura_idAsignatura', '=' , 'asignatura.idAsignatura')
             ->orderBy('seccion_por_semestre.numero_seccion')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$id)
@@ -990,7 +991,7 @@ class HomeController extends Controller
             $contador_alumnos = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -1000,7 +1001,7 @@ class HomeController extends Controller
             $respuestas_teoricas = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -1014,7 +1015,7 @@ class HomeController extends Controller
            ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('campus_decreto','seccion_por_semestre.Asignatura_idAsignatura','=','campus_decreto.idAsignatura')
             ->orderBy('campus_clinico_seccion.nrc')
@@ -1027,7 +1028,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -1039,7 +1040,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->groupBy('campus_clinico_seccion.nrc')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$id)
@@ -1049,7 +1050,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-               
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -1063,7 +1064,7 @@ class HomeController extends Controller
             ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-                
+
             })
             ->join('profesor_seccion','campus_clinico_seccion.idProfesor_seccion','profesor_seccion.idProfesor_Campus_clinico')
             ->join('docente','docente.idDocente','=','profesor_seccion.Docente_idDocente')
@@ -1129,18 +1130,18 @@ class HomeController extends Controller
 
             //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
             //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
-            
+
             return view('home',[
             'tipo' => $tipo,
             'periodos' => $periodos,
             'code_periodo' =>$id,
             'asignatura' => $asignatura,
-            
+
             'cantidad_teoricos' => $contador_alumnos,
-            
+
             'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
             'campus_clinico' => $campus_clinico,
-            
+
             'contador_docentes_clinicos' => $contador_docentes_clinicos,
             'rotaciones' => $rotaciones,
             'contador_rotaciones' => $contador_rotaciones,
@@ -1171,7 +1172,7 @@ class HomeController extends Controller
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$id)
             ->select('seccion_por_semestre.Periodo_idPeriodo','seccion_por_semestre.numero_seccion','asignatura.Nombre','seccion_por_semestre.actividad','seccion_por_semestre.fecha_inicio_encuesta','seccion_por_semestre.fecha_termino_encuesta')->get();
 
-            //seccion Alumnos Teoricos 
+            //seccion Alumnos Teoricos
             $contador_alumnos = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc')
@@ -1181,7 +1182,7 @@ class HomeController extends Controller
             ->orderBy('seccion_por_semestre.numero_seccion')
             ->where('seccion_por_semestre.Periodo_idPeriodo','=',$id)
             ->select(DB::raw('count(alumno_seccion.nrc) as cantidad_seccion'),'seccion_por_semestre.numero_seccion','seccion_por_semestre.actividad')->get();
-            
+
 
             //datos Campus clinico Docente
             $campus_clinico = DB::connection('mysql')->table('rotacion_por_semestre')
@@ -1255,7 +1256,7 @@ class HomeController extends Controller
             $respuestas_teoricas = DB::connection('mysql')->table('seccion_por_semestre')->join('alumno_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion', '=', 'alumno_seccion.nrc');
-                
+
             })
             ->groupBy('seccion_por_semestre.actividad','seccion_por_semestre.numero_seccion')
             ->orderBy('seccion_por_semestre.numero_seccion')
@@ -1312,7 +1313,7 @@ class HomeController extends Controller
              ->join('campus_clinico_seccion',function($join)
             {
                 $join->on('seccion_por_semestre.idRamo_seccion','=','campus_clinico_seccion.seccion_semestre');
-               
+
             })
             ->join('alumno_seccion','campus_clinico_seccion.alumno_seccion','=','alumno_seccion.idAlumno_seccion')
             ->join('alumno','alumno.rut','=','alumno_seccion.rut_alumno')
@@ -1323,7 +1324,7 @@ class HomeController extends Controller
                 ['profesor_seccion.Docente_idDocente','=',$this->rut]])
             ->select(DB::raw('count(campus_clinico_seccion.res_encuesta) as resp_encuesta')
                 ,'campus_clinico_seccion.nrc')->get();
-            
+
         //dd($contador_alumnos_clinicos);
         //dd($campus_clinico,$alumnos_clinicos,$docentes_clinicos,$contador_rotaciones,$rotaciones);
         //dd($docentes_clinicos,$contador_rotaciones,$rotaciones);
@@ -1346,8 +1347,8 @@ class HomeController extends Controller
             'respuestas_clinicas' => $respuestas_clinicas,
             'respuestas_rotaciones' => $respuestas_rotaciones,
             'entrego_rubrica' => $entregas_rubrica,
-            'rotaciones_rubrica' => $rotaciones_rubrica]); 
-        
+            'rotaciones_rubrica' => $rotaciones_rubrica]);
+
     }
 
     public function encuesta(Request $request)
@@ -1387,4 +1388,4 @@ class HomeController extends Controller
         return Redirect::to($url);
     }
 }
-
+?>
