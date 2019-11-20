@@ -25,9 +25,9 @@ Route::get('/home/PA/{id}','home2@periodos_PA')->name('periodo_pa');
 
 Route::get('/home/Sa/{id}','home2@periodos_SA')->name('periodo_sa');
 
-Route::get('/home/docente/{id}','HomeController@periodo_docente')->name('periodo_doc');
+Route::get('/home/docente/{id}','home2@periodo_docente')->name('periodo_doc');
 
-Route::get('/home/alumno/','HomeController@encuesta')->name('fun_encuesta');
+Route::get('/home/alumno/','home2@encuesta')->name('fun_encuesta');
 
 Route::get('/notification','NotificationController@index')->name('notificacion');
 

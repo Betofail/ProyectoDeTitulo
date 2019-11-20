@@ -64,16 +64,28 @@
                             <td>{{$value->fecha_inicio_encuesta}}</td>
                             <td>{{$value->fecha_termino_encuesta}}</td>
                             <td>{{$value->actividad}}</td>
+
                             @if($tipo == 'alumno')
-                                @foreach($estados as $key_st => $value_st)
-                                    @if($value_st['nrc'] == $value->nrc && $value_st['estado'] == "N")
-                                        <td><a href="{{action('HomeController@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{$value->link_encuesta}}</a></td>
-                                    @elseif($value_st['nrc'] == $value->nrc && $value_st['estado'] != "N")
-                                        <td>Completado el :{{$value_st['estado']}}</td>
-                                    @elseif(is_null($value->link_encuesta))
-                                        <td>no tiene encuesta</td>
-                                    @endif
-                                @endforeach
+                            @if($value->link_encuesta == "none")
+                                <td>none</td>
+                            @else
+                                @if(!$estados)
+                                    <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{$value->link_encuesta}}</a></td>
+                                @else
+                                    @foreach($estados as $key_st => $value_st)
+                                        @if($value_st['nrc'] == $value->nrc && $value_st['estado'] == "N")
+                                            <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{$value->link_encuesta}}</a></td>
+                                            @break
+                                        @elseif($value_st['nrc'] == $value->nrc && $value_st['estado'] != "N")
+                                            <td>Completado el :{{$value_st['estado']}}</td>
+                                            @break
+                                        @elseif(is_null($value->link_encuesta))
+                                            <td>no tiene encuesta</td>
+                                            @break
+                                        @endif
+                                    @endforeach
+                                @endif
+                            @endif
                             @else
                                 @if($cantidad_teoricos->isEmpty())
                                     <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">

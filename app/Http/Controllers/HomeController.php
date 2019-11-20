@@ -1357,7 +1357,7 @@ class HomeController extends Controller
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'oviedo83' );
 
-        $this->rut = DB::connection('mysql')->table('alumno')->where('email',Auth::user()->email)->value('rut');
+        $this->rut = DB::connection('mysql3')->table('alumnos')->where('email',Auth::user()->email)->value('rut');
 
         $this->rut = substr((string)$this->rut,0,4);
         // the survey to process
