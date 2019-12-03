@@ -20,7 +20,7 @@
                     </div>
                 </div>
             </div>
-        <form method="POST" action="{{route('asignar_encuestas')}}">
+        <form method="POST" action="{{route('enlasar_encuestas')}}">
             @csrf
             <input type="hidden" name='encuesta' value="{{$sid_en}}">
             <button class="btn btn-primary btn-block">Guardar Cambios</button>
@@ -60,34 +60,32 @@
         </div>
     </div>
 </div>
-@section('script')
-<script>
-    $(document).ready(function(){
-        $('#sin_encuestas').on('dblclick','input',function(){
-            var x = Math.floor((Math.random() * 10000000) + 1)
-            var node = $("<input>").val($(this).val()).attr({
-                type: 'text',
-                name: 'con_en/'+x,
-                readonly: 'true',
-                class: 'form-group'
+    @section('script')
+        <script>
+            $(document).ready(function(){
+                $('#sin_encuestas').on('dblclick','input',function(){
+                    var x = Math.floor((Math.random() * 10000000) + 1)
+                    var node = $("<input>").val($(this).val()).attr({
+                        type: 'text',
+                        name: 'con_en/'+x,
+                        readonly: 'true',
+                        class: 'form-group'
+                    });
+                    $('#con_encuestas').append(node);
+                    this.remove();
+                });
+                $('#con_encuestas').on('dblclick','input',function(){
+                    var x = Math.floor((Math.random() * 10000000) + 1)
+                    var node = $("<input>").val($(this).val()).attr({
+                        type: 'text',
+                        name: 'sin_en/'+x,
+                        readonly: 'true',
+                        class: 'form-group'
+                    });
+                    $('#sin_encuestas').append(node);
+                    this.remove();
+                })
             });
-            $('#con_encuestas').append(node);
-            this.remove();
-        });
-        $('#con_encuestas').on('dblclick','input',function(){
-            var x = Math.floor((Math.random() * 10000000) + 1)
-            var node = $("<input>").val($(this).val()).attr({
-                type: 'text',
-                name: 'sin_en/'+x,
-                readonly: 'true',
-                class: 'form-group'
-            });
-            $('#sin_encuestas').append(node);
-            this.remove();
-        })
-    });
-
-
-</script>
-@endsection
+        </script>
+    @endsection
 @endsection

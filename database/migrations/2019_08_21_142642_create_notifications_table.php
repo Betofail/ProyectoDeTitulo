@@ -13,7 +13,7 @@ class CreateNotificationsTable extends Migration
      */
     public function up()
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('notifications', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('sender_id');
             $table->unsignedInteger('receptor_id');

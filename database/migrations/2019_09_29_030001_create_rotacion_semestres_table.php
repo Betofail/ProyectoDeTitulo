@@ -13,7 +13,7 @@ class CreateRotacionSemestresTable extends Migration
      */
     public function up()
     {
-        Schema::create('rotacion_semestres', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('rotacion_semestres', function (Blueprint $table) {
             $table->integer('idRotacion');
             $table->date('fecha_inicio');
             $table->date('fecha_termino');

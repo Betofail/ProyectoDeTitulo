@@ -13,7 +13,7 @@ class CreateAlumnosTable extends Migration
      */
     public function up()
     {
-        Schema::create('alumnos', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('alumnos', function (Blueprint $table) {
             $table->string('rut');
             $table->string('nombre');
             $table->string('email');

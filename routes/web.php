@@ -38,7 +38,11 @@ Route::post('/home','NotificationController@encuestas')->name('encuestas');
 Route::get('/enlace','EnlaceController@index')->name('enlace');
 Route::get('/encuesta_enlace/{id}','EnlaceController@tipo_encuesta')->name('cambio_encuesta');
 
-Route::post('change_enc','EnlaceController@enlasar_encuesta')->name('asignar_encuestas');
+Route::get('/asignar','AsignarController@index')->name('asignar');
+Route::get('/asignar/periodo/{id}','AsignarController@cambio_periodo')->name('cambio_periodo');
+Route::post('/asignar/enlasado','AsignarController@asignar_asignatura')->name('asignar_asignatura');
+
+Route::post('change_enc','EnlaceController@enlasar_encuesta')->name('enlasar_encuestas');
 
 Route::get('/cargador','CargadorController@index')->name('cargador');
 Route::get('export','CargadorController@export')->name('export');
@@ -46,3 +50,4 @@ Route::post('import_alu','CargadorController@import')->name('import_alu');
 Route::post('import_sec','CargadorController@import_secction')->name('import_sec');
 Route::post('import_asing','CargadorController@import_asignatura')->name('import_asing');
 Route::post('import_docente','CargadorController@import_docente')->name('import_docente');
+Route::post('import_malla','CargadorController@import_malla')->name('import_malla');

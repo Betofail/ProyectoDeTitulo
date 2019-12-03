@@ -13,7 +13,7 @@ class CreateDocentesTable extends Migration
      */
     public function up()
     {
-        Schema::create('docentes', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('docentes', function (Blueprint $table) {
             $table->string('rut');
             $table->string('nombre');
             $table->string('email')->unique();

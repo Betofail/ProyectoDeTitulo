@@ -64,7 +64,8 @@
                                     @if(Auth::user()->tipo == 'SA')
                                     <a class="dropdown-item" href="{{route('cargador')}}">Programación</a>
                                     @elseif(Auth::user()->tipo == 'OFEM')
-                                <a class="dropdown-item" href="{{route('enlace')}}">Cargar Encuesta</a>
+                                    <a class="dropdown-item" href="{{route('asignar')}}">Asignar Encuesta</a>
+                                    <a class="dropdown-item" href="{{route('enlace')}}">Cargar Encuesta</a>
                                     @endif
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

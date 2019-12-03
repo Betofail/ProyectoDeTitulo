@@ -19,6 +19,8 @@ class AsignaturaImport implements ToCollection
     {
     	$chunk = $collection->splice(5);
         $periodo = str_replace(':','',trim($chunk[0][2]));
+        $periodo = substr($periodo,1);
+
         $nombre_periodo = trim($chunk[0][4]);
         $carrera = str_replace(':','',trim($chunk[2][2]));
         $nombre_carrera = trim($chunk[2][4]);
@@ -46,18 +48,35 @@ class AsignaturaImport implements ToCollection
         }
         $chunk = $chunk->splice(6);
         foreach ($chunk as $key => $value) {
+
             if (Asignatura::where('idAsignatura','=',$value[8])->count() > 0) {
                 continue;
             }
             else{
-            $asignatura = Asignatura::Create([
-                'idAsignatura' => $value[8],
-                'nombre' => $value[16],
-                'idCarrera' => $carrera,
-                'semestre' => $periodo,
-                'conformacion_semestre' => 2
-            ]);
-            $asignatura->save();
+
+                if(count($value[6]) > 5){
+                    continue;
+                }else{
+
+                    if(strlen($value[5]) == 1){
+                        $codigo_asig = $value[4].'00'.$value[5];
+                    }
+                    elseif(strlen($value[5]) == 2){
+                        $codigo_asig = $value[4].'0'.$value[5];
+                    }elseif (strlen($value[5]) >= 3) {
+                        $codigo_asig = $value[4].$value[5];
+                    }
+                    $asignatura = Asignatura::Create([
+                        'idAsignatura' => $value[8],
+                        'codigo_asignatura' => $codigo_asig,
+                        'nombre' => $value[16],
+                        'idCarrera' => $carrera,
+                        'semestre' => $periodo,
+                        'confirmacion_semestre' => 2,
+                        'sede' => $value[1]
+                    ]);
+                    $asignatura->save();
+                }
             }
         }
     }

@@ -116,11 +116,11 @@ class CargadorController extends Controller
             try {
                 Excel::import(new AsignaturaImport,$request->file('file_asignatura'));
             } catch (\Exception $e) {
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\Error $e){
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\InvalidArgument $e){
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\Illuminate\Database\QueryException $e){
                 return back()->with('error','inconsistencia de datos');
             }
@@ -129,7 +129,6 @@ class CargadorController extends Controller
             return back()->with('error',$validator->errors()->first());
         }
     }
-
     public function import_malla(Request $request)
     {
          $validator = Validator::make($request->all(),[
@@ -140,11 +139,11 @@ class CargadorController extends Controller
             try {
                 Excel::import(new MallaImport,$request->file('file_malla'));
             } catch (\Exception $e) {
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\Error $e){
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\InvalidArgument $e){
-                return back()->with('error','Algo salio mal, revice su archivo');
+                return back()->with('error',$e->getMessage());
             } catch(\Illuminate\Database\QueryException $e){
                 return back()->with('error','inconsistencia de datos');
             }

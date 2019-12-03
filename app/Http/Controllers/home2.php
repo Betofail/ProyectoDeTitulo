@@ -537,6 +537,11 @@ class home2 extends Controller
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
 
             ->join('asignaturas','seccion_semestres.nrc', '=' , 'asignaturas.idAsignatura')
+            ->join('mallas',function($join)
+            {
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where('mallas.Encuesta','=', 1);
+            })
             ->orderBy('seccion_semestres.nrc')
             ->where('seccion_semestres.idPeriodo','=',$this->periodos)
             ->select('seccion_semestres.idPeriodo','seccion_semestres.nrc','asignaturas.nombre','seccion_semestres.actividad','seccion_semestres.fecha_inicio_encuesta','seccion_semestres.fecha_termino_encuesta')->get();
@@ -717,6 +722,11 @@ class home2 extends Controller
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
 
             ->join('asignaturas','seccion_semestres.nrc', '=' , 'asignaturas.idAsignatura')
+            ->join('mallas',function($join)
+            {
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where('mallas.Encuesta','=', 1);
+            })
             ->orderBy('seccion_semestres.nrc')
             ->where('seccion_semestres.idPeriodo','=',$this->periodos)
             ->select('seccion_semestres.idPeriodo','seccion_semestres.nrc','asignaturas.nombre','seccion_semestres.actividad','seccion_semestres.fecha_inicio_encuesta','seccion_semestres.fecha_termino_encuesta')->get();

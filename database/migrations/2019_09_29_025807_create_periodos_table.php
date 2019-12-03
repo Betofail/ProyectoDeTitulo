@@ -13,7 +13,7 @@ class CreatePeriodosTable extends Migration
      */
     public function up()
     {
-        Schema::create('periodos', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('periodos', function (Blueprint $table) {
             $table->bigIncrements('idPeriodo');
             $table->string('decripcion');
             $table->integer('estado');

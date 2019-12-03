@@ -13,9 +13,9 @@ class CreateHospitalsTable extends Migration
      */
     public function up()
     {
-        Schema::create('hospitals', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('hospitals', function (Blueprint $table) {
             $table->bigIncrements('idHospital');
-            
+
             $table->string('nombre');
         });
     }

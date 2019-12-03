@@ -13,7 +13,7 @@ class CreateDocenteSeccionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('docente_seccions', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('docente_seccions', function (Blueprint $table) {
             $table->bigIncrements('idProfesor_campus');
             $table->string('idDocente');
             $table->unsignedBigInteger('seccion_docente');

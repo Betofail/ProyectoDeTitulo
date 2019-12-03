@@ -13,7 +13,7 @@ class CreateAlumnoSeccionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('alumno_seccions', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('alumno_seccions', function (Blueprint $table) {
             $table->bigIncrements('idSeccion');
             $table->string('rut_alumno')->unique();
             $table->unsignedBigInteger('nrc');

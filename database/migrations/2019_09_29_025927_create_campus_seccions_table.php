@@ -13,7 +13,7 @@ class CreateCampusSeccionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('campus_seccions', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('campus_seccions', function (Blueprint $table) {
             $table->bigIncrements('idCampus_clinico');
             $table->unsignedBigInteger('alumno_seccion');
             $table->unsignedBigInteger('rotacion');

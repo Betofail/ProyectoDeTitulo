@@ -13,7 +13,7 @@ class CreateCarrerasTable extends Migration
      */
     public function up()
     {
-        Schema::create('carreras', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('carreras', function (Blueprint $table) {
                 $table->bigIncrements('idCarrera');
                 $table->string('codigo_carrera')->unique();
                 $table->string('nombre');

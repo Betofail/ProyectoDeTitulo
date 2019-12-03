@@ -13,7 +13,7 @@ class CreateCampusDecretosTable extends Migration
      */
     public function up()
     {
-        Schema::create('campus_decretos', function (Blueprint $table) {
+        Schema::connection('mysql3')->create('campus_decretos', function (Blueprint $table) {
             $table->string('codigo_campus');
             $table->date('semana_inicio');
             $table->integer('duracion');
