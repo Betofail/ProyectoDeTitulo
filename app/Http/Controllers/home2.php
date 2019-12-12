@@ -20,15 +20,9 @@ class home2 extends Controller
 
     public function index()
     {
-<<<<<<< HEAD
-        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
-        define( 'LS_USER', 'Alberto' );
-        define( 'LS_PASSWORD', 'master12' );
-=======
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
         define('LS_USER', 'Alberto');
         define('LS_PASSWORD', 'master12');
->>>>>>> 671453fea48e6d542ef73b6cc3c86747cec0d08b
 
         $periodos = DB::connection('mysql3')->table('periodos')
             ->where('estado', '>', '1')->get()->toArray();
@@ -1398,15 +1392,9 @@ class home2 extends Controller
     }
     public function encuesta(Request $request)
     {
-<<<<<<< HEAD
-        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
-        define( 'LS_USER', 'Alberto' );
-        define( 'LS_PASSWORD', 'master12' );
-=======
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
         define('LS_USER', 'Alberto');
         define('LS_PASSWORD', 'master12');
->>>>>>> 671453fea48e6d542ef73b6cc3c86747cec0d08b
 
         $this->rut = DB::connection('mysql3')->table('alumnos')->where('email', Auth::user()->email)->value('rut');
 

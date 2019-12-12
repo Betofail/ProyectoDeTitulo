@@ -11,15 +11,9 @@ class EnlaceController extends Controller
 
     public function index()
     {
-<<<<<<< HEAD
-        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
-        define( 'LS_USER', 'Alberto' );
-        define( 'LS_PASSWORD', 'master12' );
-=======
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
         define('LS_USER', 'Alberto');
         define('LS_PASSWORD', 'master12');
->>>>>>> 671453fea48e6d542ef73b6cc3c86747cec0d08b
 
         // instantiate a new client
         $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
@@ -49,18 +43,11 @@ class EnlaceController extends Controller
         ]);
     }
 
-<<<<<<< HEAD
-    public function tipo_encuesta($id){
-        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
-        define( 'LS_USER', 'Alberto' );
-        define( 'LS_PASSWORD', 'master12' );
-=======
     public function tipo_encuesta($id)
     {
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
         define('LS_USER', 'Alberto');
         define('LS_PASSWORD', 'master12');
->>>>>>> 671453fea48e6d542ef73b6cc3c86747cec0d08b
 
         // instantiate a new client
         $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
@@ -187,15 +174,9 @@ class EnlaceController extends Controller
 
     public function enlasar_encuesta(Request $request)
     {
-<<<<<<< HEAD
-        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
-        define( 'LS_USER', 'Alberto' );
-        define( 'LS_PASSWORD', 'master12' );
-=======
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
         define('LS_USER', 'Alberto');
         define('LS_PASSWORD', 'master12');
->>>>>>> 671453fea48e6d542ef73b6cc3c86747cec0d08b
 
         // instantiate a new client
         $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
