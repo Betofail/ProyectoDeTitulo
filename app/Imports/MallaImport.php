@@ -33,7 +33,7 @@ class MallaImport implements ToCollection
                 continue;
             }
             else{
-                if((int)$value[2] > 0 ){
+                if((int)$value[2] > 0 and (int)$value[7] > 0){
                     if(Malla::where('CodAsign','=',$value[0])->count() > 0){
                         Malla::where('CodAsign',$value[0])->update(['Vigente' => 1]);
                     }else{
@@ -43,7 +43,23 @@ class MallaImport implements ToCollection
                             'Encuesta' => 0,
                             'CodCarrera' => $programa,
                             'PeriodoCatalogo' => $catalogo,
-                            'Vigente' => 1
+                            'Vigente' => 1,
+                            'CampusClinico' => 1
+                        ]);
+                        $malla->save();
+                    }
+                }elseif((int)$value[2] > 0){
+                    if(Malla::where('CodAsign','=',$value[0])->count() > 0){
+                        Malla::where('CodAsign',$value[0])->update(['Vigente' => 1]);
+                    }else{
+                        $malla = Malla::create([
+                            'CodAsign' => $value[0],
+                            'Nombre' => $value[1],
+                            'Encuesta' => 0,
+                            'CodCarrera' => $programa,
+                            'PeriodoCatalogo' => $catalogo,
+                            'Vigente' => 1,
+                            'CampusClinico' => 0
                         ]);
                         $malla->save();
                     }
@@ -51,7 +67,7 @@ class MallaImport implements ToCollection
                 else{
                     $contador = 3;
                     while(true){
-                        if((int)$value[$contador] > 0){
+                        if((int)$value[$contador] > 0 and $contador == 7){
                             if(Malla::where('CodAsign','=',$value[0])->count() > 0){
                                 Malla::where('CodAsign',$value[0])->update(['Vigente'=> 1]);
                                 break;
@@ -62,12 +78,31 @@ class MallaImport implements ToCollection
                                     'Encuesta' => 0,
                                     'CodCarrera' => $programa,
                                     'PeriodoCatalogo' => $catalogo,
-                                    'Vigente' => 1
+                                    'Vigente' => 1,
+                                    'CampusClinico' => 1
                                 ]);
                                 $malla->save();
                                 break;
                             }
-                        }else{
+                        }elseif((int)$value[$contador] > 0){
+                            if(Malla::where('CodAsign','=',$value[0])->count() > 0){
+                                Malla::where('CodAsign',$value[0])->update(['Vigente'=> 1]);
+                                break;
+                            }else{
+                                $malla = Malla::create([
+                                    'CodAsign' => $value[0],
+                                    'Nombre' => $value[1],
+                                    'Encuesta' => 0,
+                                    'CodCarrera' => $programa,
+                                    'PeriodoCatalogo' => $catalogo,
+                                    'Vigente' => 1,
+                                    'CampusClinico' => 0
+                                ]);
+                                $malla->save();
+                                break;
+                            }
+                        }
+                        else{
                             if($contador >= 15){
                                 break;
                             }

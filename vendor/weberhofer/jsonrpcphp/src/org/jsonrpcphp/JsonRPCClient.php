@@ -38,7 +38,7 @@ class JsonRPCClient
      *
      * @var boolean
      */
-    private $debug;
+    private $debug = false;
 
     /**
      * The server URL
@@ -46,6 +46,13 @@ class JsonRPCClient
      * @var string
      */
     private $url;
+
+    /**
+     * Proxy to be used
+     *
+     * @var string
+     */
+    private $proxy = null;
 
     /**
      * The request id
@@ -60,11 +67,11 @@ class JsonRPCClient
      * @var boolean
      */
     private $notification = false;
-    
+
     /**
      * If false, requests will be forced to use fopen() instead.
      * This option is specific in case of cURL is callable but may not practically unsable.
-     * 
+     *
      * @var boolean
      */
     private $enableCurl = true;
@@ -74,15 +81,13 @@ class JsonRPCClient
      *
      * @param string $url
      * @param boolean $debug
+     * @param string $proxy
      */
-    public function __construct($url, $debug = false)
+    public function __construct($url, $debug = false, $proxy = null)
     {
-        // server URL
         $this->url = $url;
-        // proxy
-        empty($proxy) ? $this->proxy = '' : $this->proxy = $proxy;
-        // debug state
-        empty($debug) ? $this->debug = false : $this->debug = true;
+        $this->proxy = $proxy;
+        $this->debug = ($this->debug === true);
         // message id
         $this->id = 1;
     }
@@ -150,6 +155,9 @@ class JsonRPCClient
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+            if ($this->proxy !== null && trim($this->proxy) !== '') {
+                curl_setopt($ch, CURLOPT_PROXY, $this->proxy);
+            }
             $response = curl_exec($ch);
             if ($response === false) {
                 throw new \Exception('Unable to connect to ' . $this->url);
@@ -184,8 +192,8 @@ class JsonRPCClient
             if ($response['id'] != $currentId) {
                 throw new \Exception('Incorrect response id: ' . $response['id'] . ' (request id: ' . $currentId . ')');
             }
-            if (! is_null($response['error'])) {
-                throw new \Exception('Request error: ' . $response['error']);
+            if (array_key_exists('error', $response) && $response['error'] !== null) {
+                throw new \Exception('Request error: ' . json_encode($response['error']));
             }
 
             return $response['result'];
@@ -193,7 +201,7 @@ class JsonRPCClient
             return true;
         }
     }
-    
+
     /**
      * Enable cURL when performs a jsonRCP request.
      */
@@ -201,7 +209,7 @@ class JsonRPCClient
     {
         $this->enableCurl = true;
     }
-    
+
     /**
      * Disable cURL when performs a jsonRCP request.
      */

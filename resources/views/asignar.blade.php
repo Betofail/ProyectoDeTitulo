@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="col">
             <div class="card text-center">
                 <div class="card-header">
@@ -33,7 +33,7 @@
                             <div class="card-body">
                                 <ul class="list-group" id="sin_encuestas">
                                     @foreach ($sin_encuesta as $key => $item)
-                                    <input class="form-group" type="text" readonly="true" value="{{$item['nombre'].'-'.$item['codigo']}}">
+                                    <input class="form-control" type="text" readonly="true" value="{{$item['nombre'].'-'.$item['codigo']}}">
                                     @endforeach
                                 </ul>
                             </div>
@@ -48,7 +48,7 @@
                             <div class="card-body">
                                 <ul class="list-group" id="con_encuestas">
                                     @foreach ($con_encuesta as $key =>  $item)
-                                    <input class="form-group" type="text" readonly="true" value="{{$item['nombre'].'-'.$item['codigo']}}">
+                                    <input class="form-control" type="text" readonly="true" value="{{$item['nombre'].'-'.$item['codigo']}}">
                                     @endforeach
                                 </ul>
                             </div>
@@ -68,7 +68,7 @@
                         type: 'text',
                         name: 'con_en/'+x,
                         readonly: 'true',
-                        class: 'form-group'
+                        class: 'form-control'
                     });
                     $('#con_encuestas').append(node);
                     this.remove();
@@ -79,7 +79,7 @@
                         type: 'text',
                         name: 'sin_en/'+x,
                         readonly: 'true',
-                        class: 'form-group'
+                        class: 'form-control'
                     });
                     $('#sin_encuestas').append(node);
                     this.remove();
