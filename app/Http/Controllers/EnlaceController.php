@@ -11,7 +11,7 @@ class EnlaceController extends Controller
 
     public function index()
     {
-        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'master12' );
 
@@ -42,7 +42,7 @@ class EnlaceController extends Controller
     }
 
     public function tipo_encuesta($id){
-        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'master12' );
 
@@ -80,7 +80,7 @@ class EnlaceController extends Controller
 
     public function enlasar_encuesta(Request $request)
     {
-        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'master12' );
 

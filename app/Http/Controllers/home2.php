@@ -18,7 +18,7 @@ class home2 extends Controller
 
     public function index()
     {
-        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'master12' );
 
@@ -1291,7 +1291,7 @@ class home2 extends Controller
     }
     public function encuesta(Request $request)
     {
-        define( 'LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
+        define( 'LS_BASEURL', 'http://limesurvey.nevape.cl/index.php');  // adjust this one to your actual LimeSurvey URL
         define( 'LS_USER', 'Alberto' );
         define( 'LS_PASSWORD', 'master12' );
 
