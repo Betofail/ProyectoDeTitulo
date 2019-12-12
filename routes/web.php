@@ -38,9 +38,16 @@ Route::post('/home','NotificationController@encuestas')->name('encuestas');
 Route::get('/enlace','EnlaceController@index')->name('enlace');
 Route::get('/encuesta_enlace/{id}','EnlaceController@tipo_encuesta')->name('cambio_encuesta');
 
+Route::get('/enlace_cli','EnlaceController@index_cli')->name('enlace_cli');
+Route::get('/encuesta_enlace_cli/{id}','EnlaceController@tipo_encuesta_cli')->name('cambio_encuesta_cli');
+
 Route::get('/asignar','AsignarController@index')->name('asignar');
 Route::get('/asignar/periodo/{id}','AsignarController@cambio_periodo')->name('cambio_periodo');
 Route::post('/asignar/enlasado','AsignarController@asignar_asignatura')->name('asignar_asignatura');
+
+Route::get('/asignar_cli','AsignarController@index_cli')->name('asignar_cli');
+Route::get('/asignar_cli/periodo/{id}','AsignarController@cambio_periodo_cli')->name('cambio_periodo_cli');
+Route::get('/asignar_cli/enlasado','AsignarController@asignar_asignatura_cli')->name('asignar_asignatura_cli');
 
 Route::post('change_enc','EnlaceController@enlasar_encuesta')->name('enlasar_encuestas');
 

@@ -49,6 +49,7 @@
                         @else
                             <th>NRC Asignatura</th>
                             <th>Asignatura</th>
+                            >
                             <th>Inicio Encuesta</th>
                             <th>Termino Encuesta</th>
                             <th>Actividad</th>
@@ -61,6 +62,7 @@
                         <tr>
                             <td>{{$value->numero_seccion}}</td>
                             <td>{{$value->Nombre}}</td>
+
                             <td>{{$value->fecha_inicio_encuesta}}</td>
                             <td>{{$value->fecha_termino_encuesta}}</td>
                             <td>{{$value->actividad}}</td>

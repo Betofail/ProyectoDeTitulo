@@ -49,7 +49,7 @@ class AsignaturaImport implements ToCollection
         $chunk = $chunk->splice(6);
         foreach ($chunk as $key => $value) {
 
-            if (Asignatura::where('idAsignatura','=',$value[8])->count() > 0) {
+            if (Asignatura::where('idAsignatura','=',$value[8])->where('actividad','=',$value[18])->count() > 0) {
                 continue;
             }
             else{
@@ -66,6 +66,8 @@ class AsignaturaImport implements ToCollection
                     }elseif (strlen($value[5]) >= 3) {
                         $codigo_asig = $value[4].$value[5];
                     }
+
+                    $liga = str_replace(' ','',$value[10]);
                     $asignatura = Asignatura::Create([
                         'idAsignatura' => $value[8],
                         'codigo_asignatura' => $codigo_asig,
@@ -73,7 +75,10 @@ class AsignaturaImport implements ToCollection
                         'idCarrera' => $carrera,
                         'semestre' => $periodo,
                         'confirmacion_semestre' => 2,
-                        'sede' => $value[1]
+                        'sede' => $value[1],
+                        'Liga' => $liga,
+                        'LCruzada' => $value[11],
+                        'actividad' => $value[18]
                     ]);
                     $asignatura->save();
                 }
