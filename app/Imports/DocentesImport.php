@@ -20,13 +20,15 @@ class DocentesImport implements ToCollection
 
         foreach ($chunk as $key => $value) {
             if (Str::contains($value[14],'/')) {
-                $arreglo = str_replace(' ','',explode('/',$value[14]));
-                $nombres = str_replace(' ','',explode('/',$value[15]));
+                $arreglo = explode('/',$value[14]);
+                $nombres = explode('/',$value[15]);
+
                 for ($i=0; $i < count($arreglo); $i++) {
-                    if (Docente::where('rut','=',$arreglo[$i])->count() > 0) {
+
+                    if (Docente::where('rut','=',trim($arreglo[$i]))->count() > 0) {
                         $seccion = Seccion_semestre::create([
                             'idPeriodo' => $value[3],
-                            'idDocente' => $arreglo[$i],
+                            'idDocente' => trim($arreglo[$i]),
                             'link_encuesta' => 'none',
                             'nrc' => $value[8],
                             'actividad' => $value[18]
@@ -34,20 +36,33 @@ class DocentesImport implements ToCollection
                         $seccion->save();
                         continue;
                     }else{
-                        $docente = Docente::create([
-                            'rut' => $arreglo[$i],
-                            'nombre' => $nombres[$i],
-                            'email' => 'none'
-                        ]);
-                        $docente->save();
-                        $seccion = Seccion_semestre::create([
-                            'idPeriodo' => $value[3],
-                            'idDocente' => $arreglo[$i],
-                            'link_encuesta' => 'none',
-                            'nrc' => $value[8],
-                            'actividad' => $value[18]
-                        ]);
-                        $seccion->save();
+                        if (Docente::where('rut','=',trim($arreglo[$i]))->count() > 0){
+                            $seccion = Seccion_semestre::create([
+                                'idPeriodo' => $value[3],
+                                'idDocente' => trim($arreglo[$i]),
+                                'link_encuesta' => 'none',
+                                'nrc' => $value[8],
+                                'actividad' => $value[18]
+                            ]);
+                            $seccion->save();
+                            continue;
+                        }else{
+                            $docente = Docente::create([
+                                'rut' => trim($arreglo[$i]),
+                                'nombre' => trim($nombres[$i]),
+                                'email' => 'none'
+                            ]);
+                            $docente->save();
+                            $seccion = Seccion_semestre::create([
+                                'idPeriodo' => $value[3],
+                                'idDocente' => trim($arreglo[$i]),
+                                'link_encuesta' => 'none',
+                                'nrc' => $value[8],
+                                'actividad' => $value[18]
+                            ]);
+                            $seccion->save();
+
+                        }
                     }
                 }
             }

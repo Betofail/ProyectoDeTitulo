@@ -29,12 +29,12 @@
                     <div class="card text-center">
                         <div class="card-header">
                             <h5>Asignaturas Sin Encuestas</h5>
-                            <h5>asignaturas - nrc / docente / actividad</h5>
+                            <h5>asignaturas * nrc / docente / actividad</h5>
                         </div>
                         <div class="card-body-xl">
                             <ul class="list-group" id="sin_encuestas">
                                 @foreach ($asignaturas as $item)
-                                <input class="form-control" type="text" readonly="true" value="{{$item->asign.' - '.$item->nrc.' / '.$item->nombre.' / '.$item->actividad}}">
+                                <input class="form-control" type="text" readonly="true" value="{{$item->asign.' * '.$item->nrc.' / '.$item->nombre.' / '.$item->actividad}}">
                                 @endforeach
                             </ul>
                         </div>
@@ -44,12 +44,12 @@
                     <div class="card text-center">
                         <div class="card-header">
                             <h5>Asignaturas Con Encuesta Actual</h5>
-                            <h5>asignaturas - nrc / docente / actividad</h5>
+                            <h5>asignaturas * nrc / docente / actividad</h5>
                         </div>
                         <div class="card-body">
                             <ul class="list-group" id="con_encuestas">
                                 @foreach ($asignaturas_con as $item)
-                                <input class="form-control" type="text" readonly="true" value="{{$item->asign.' - '.$item->nrc.' / '.$item->nombre.' / '.$item->actividad}}">
+                                <input class="form-control" type="text" readonly="true" value="{{$item->asign.' *'.$item->nrc.' / '.$item->nombre.' / '.$item->actividad}}">
                                 @endforeach
                             </ul>
                         </div>

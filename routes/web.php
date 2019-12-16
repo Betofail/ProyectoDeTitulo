@@ -23,7 +23,10 @@ Route::get('/home', 'home2@index')->name('home');
 
 Route::get('/home/PA/{id}','home2@periodos_PA')->name('periodo_pa');
 
-Route::get('/home/Sa/{id}','home2@periodos_SA')->name('periodo_sa');
+Route::get('/home/SA/periodo/{id}','home2@periodos_SA')->name('periodo_sa');
+Route::get('/home/SA/carrera/{id}','home2@carreras_SA')->name('carrera_sa');
+
+Route::get('/home/OFEM/carrera/{id}','home2@carreras_SA')->name('carrera_ofem');
 
 Route::get('/home/docente/{id}','home2@periodo_docente')->name('periodo_doc');
 

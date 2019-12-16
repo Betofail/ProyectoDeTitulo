@@ -27,7 +27,6 @@ return array(
     'App\\Http\\Controllers\\CargadorController' => $baseDir . '/app/Http/Controllers/CargadorController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
     'App\\Http\\Controllers\\EnlaceController' => $baseDir . '/app/Http/Controllers/EnlaceController.php',
-    'App\\Http\\Controllers\\HomeController' => $baseDir . '/app/Http/Controllers/HomeController.php',
     'App\\Http\\Controllers\\NotificationController' => $baseDir . '/app/Http/Controllers/NotificationController.php',
     'App\\Http\\Controllers\\home2' => $baseDir . '/app/Http/Controllers/home2.php',
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',

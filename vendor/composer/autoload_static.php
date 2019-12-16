@@ -498,7 +498,6 @@ class ComposerStaticInit5ae96ebfefd4d06c458f458978ae1a72
         'App\\Http\\Controllers\\CargadorController' => __DIR__ . '/../..' . '/app/Http/Controllers/CargadorController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\EnlaceController' => __DIR__ . '/../..' . '/app/Http/Controllers/EnlaceController.php',
-        'App\\Http\\Controllers\\HomeController' => __DIR__ . '/../..' . '/app/Http/Controllers/HomeController.php',
         'App\\Http\\Controllers\\NotificationController' => __DIR__ . '/../..' . '/app/Http/Controllers/NotificationController.php',
         'App\\Http\\Controllers\\home2' => __DIR__ . '/../..' . '/app/Http/Controllers/home2.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',

@@ -68,10 +68,6 @@ class CargadorController extends Controller
 
             try {
                 Excel::import(new SeccionImport,request()->file('file_section'));
-            } catch (\Exception $e) {
-                return back()->with('error',$e->getMessage());
-            } catch(\Error $e){
-                return back()->with('error',$e->getMessage());
             } catch(\InvalidArgumentException $e){
                 return back()->with('error','Algo salio mal, algun dato no es corrrecto');
             } catch(\Illuminate\Database\QueryException $e){

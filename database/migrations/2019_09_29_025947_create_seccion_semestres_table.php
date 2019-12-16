@@ -15,8 +15,8 @@ class CreateSeccionSemestresTable extends Migration
     {
         Schema::connection('mysql3')->create('seccion_semestres', function (Blueprint $table){
             $table->bigIncrements('idSeccion');
-            $table->unsignedBigInteger('idAsignatura');
-            $table->unsignedBigInteger('idPeriodo');
+            $table->string('idAsignatura');
+            $table->string('idPeriodo');
             $table->string('idDocente');
             $table->string('link_encuesta');
             $table->integer('nrc');

@@ -28,12 +28,20 @@ class EnlaceController extends Controller
         $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
             ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
             ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->join('mallas',function($join){
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where([['mallas.Encuesta','=',1]]);
+            })
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
-            ->where([['seccion_semestres.link_encuesta', '=', 'none'], ['asignaturas.Liga', '=', '']])->distinct()->get();
+            ->where([['asignaturas.Liga', '=', '']])->distinct()->get();
 
         $asignaturas_con_encuestas = DB::connection('mysql3')->table('seccion_semestres')
             ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
             ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->join('mallas',function($join){
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where([['mallas.Encuesta','=',1]]);
+            })
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
             ->where([['seccion_semestres.link_encuesta', '=', 'limesurvey.test/index.php/' . $list_surveys[0]['sid']], ['asignaturas.Liga', '=', '']])->distinct()->get();
 
@@ -68,12 +76,20 @@ class EnlaceController extends Controller
         $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
             ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
             ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->join('mallas',function($join){
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where([['mallas.Encuesta','=',1]]);
+            })
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
-            ->where([['seccion_semestres.link_encuesta', '=', 'none'], ['asignaturas.Liga', '=', '']])->distinct()->get();
+            ->where([['asignaturas.Liga', '=', '']])->distinct()->get();
 
         $asignaturas_con_encuestas = DB::connection('mysql3')->table('seccion_semestres')
             ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
             ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->join('mallas',function($join){
+                $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
+                ->where([['mallas.Encuesta','=',1]]);
+            })
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
             ->where([['seccion_semestres.link_encuesta', '=', 'limesurvey.test/index.php/' . $id], ['asignaturas.Liga', '=', '']])->distinct()->get();
 
@@ -105,6 +121,7 @@ class EnlaceController extends Controller
                 $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
                 ->where([['mallas.CampusClinico','=',1],['asignaturas.Liga','!=','']]);
             })
+            ->orderBy('seccion_semestres.actividad')
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
             ->where([['seccion_semestres.link_encuesta', '=', 'none']])->distinct()->get();
 
@@ -115,6 +132,7 @@ class EnlaceController extends Controller
                 $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
                 ->where([['mallas.CampusClinico','=',1],['asignaturas.Liga','!=','']]);
             })
+            ->orderBy('seccion_semestres.actividad')
             ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
             ->where([['seccion_semestres.link_encuesta', '=', 'limesurvey.test/index.php/' . $list_surveys[0]['sid']]])->distinct()->get();
 
@@ -152,7 +170,7 @@ class EnlaceController extends Controller
         ->join('mallas',function($join){
             $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
             ->where([['mallas.CampusClinico','=',1],['asignaturas.Liga','!=','']]);
-        })
+        })->orderBy('seccion_semestres.actividad')
         ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
         ->where([['seccion_semestres.link_encuesta', '=', 'none']])->distinct()->get();
 
@@ -162,7 +180,7 @@ class EnlaceController extends Controller
         ->join('mallas',function($join){
             $join->on('mallas.CodAsign','=','asignaturas.codigo_asignatura')
             ->where([['mallas.CampusClinico','=',1],['asignaturas.Liga','!=','']]);
-        })
+        })->orderBy('seccion_semestres.actividad')
         ->select('asignaturas.nombre as asign', 'seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.actividad')
         ->where([['seccion_semestres.link_encuesta', '=', 'limesurvey.test/index.php/' . $id]])->distinct()->get();
 
@@ -199,52 +217,93 @@ class EnlaceController extends Controller
         foreach ($lista as $key => $value) {
             $encuesta = explode('/', $key);
             $encuesta = $encuesta[0];
+
             if ($encuesta == 'con_en') {
-                $asignatura = explode('-', $value);
+                $asignatura = explode('*', $value);
+
                 $nrc_profesor = explode('/', $asignatura[1]);
                 $docente = DB::connection('mysql3')->table('docentes')->select('rut')->where('nombre', '=', trim($nrc_profesor[1]))->get();
-                $seccion = DB::connection('mysql3')->table('seccion_semestres')->select('link_encuesta')->where([
+                $periodo = DB::connection('mysql3')->table('asignaturas')->select('semestre','actividad')
+                ->where('idAsignatura','=',trim($nrc_profesor[0]))->first();
+                $seccion = DB::connection('mysql3')->table('seccion_semestres')->select('link_encuesta','idPeriodo','actividad','idDocente','nrc')->where([
                     'nrc' => trim($nrc_profesor[0]),
-                    'idDocente' => $docente[0]->rut
+                    'idDocente' => $docente[0]->rut,
+                    'link_encuesta' => "limesurvey.test/index.php/". $sid
                 ])->get();
 
-                if ($seccion[0]->link_encuesta == 'none') {
-                    foreach ($list_surveys as $key => $value) {
-                        if ($value["sid"] == $sid) {
-                            DB::connection('mysql3')->table('seccion_semestres')->where([
-                                'nrc' => trim($nrc_profesor[0]),
-                                'idDocente' => $docente[0]->rut
-                            ])->update([
-                                'link_encuesta' => 'limesurvey.test/index.php/' . $sid, 'fecha_inicio_encuesta' => $value['startdate'],
-                                'fecha_termino_encuesta' => $value['expires']
-                            ]);
-                        } else {
-                            continue;
+                if(empty($seccion[0])){
+
+                    $seccion = DB::connection('mysql3')->table('seccion_semestres')->select('link_encuesta','idPeriodo','actividad','idDocente','nrc')->where([
+                        'nrc' => trim($nrc_profesor[0]),
+                        'idDocente' => $docente[0]->rut,
+                        'link_encuesta' => "none"
+                    ])->get();
+
+                    if(!empty($seccion[0])){
+
+                        foreach ($list_surveys as $key => $value) {
+                            if ($value["sid"] == $sid) {
+                                DB::connection('mysql3')->table('seccion_semestres')->where([
+                                    'idPeriodo' =>$periodo->semestre,
+                                    'nrc' => $seccion[0]->nrc,
+                                    'idDocente' => $docente[0]->rut
+                                ])->update([
+                                    'link_encuesta' => 'limesurvey.test/index.php/' . $sid, 'fecha_inicio_encuesta' => $value['startdate'],
+                                    'fecha_termino_encuesta' => $value['expires']
+                                ]);
+                            } else {
+                                continue;
+                            }
+                        }
+                    }else{
+                        foreach ($list_surveys as $key => $value) {
+                            if ($value["sid"] == $sid) {
+                                DB::connection('mysql3')->table('seccion_semestres')
+                                ->insert([
+                                    ['nrc' => trim($nrc_profesor[0]),'idDocente' => $docente[0]->rut,'idPeriodo' => $periodo->semestre,
+                                    'link_encuesta' => 'limesurvey.test/index.php/' . $sid, 'fecha_inicio_encuesta' => $value['startdate'],
+                                    'fecha_termino_encuesta' => $value['expires'],'actividad' => trim($nrc_profesor[2])]
+                                ]);
+                            } else {
+                                continue;
+                            }
                         }
                     }
                 }
             } elseif ($encuesta == 'sin_en') {
-                $asignatura = explode('-', $value);
+                $asignatura = explode('*', $value);
                 $nrc_profesor = explode('/', $asignatura[1]);
                 $docente = DB::connection('mysql3')->table('docentes')->select('rut')->where('nombre', '=', trim($nrc_profesor[1]))->get();
-                $seccion = DB::connection('mysql3')->table('seccion_semestres')->select('link_encuesta')->where([
+                $seccion = DB::connection('mysql3')->table('seccion_semestres')->select('idSeccion','link_encuesta')->where([
+                    'nrc' => trim($nrc_profesor[0]),
+                    'idDocente' => $docente[0]->rut,
+                    'link_encuesta' => 'limesurvey.test/index.php/' . $sid
+                ])->get();
+                $registro = DB::connection('mysql3')->table('seccion_semestres')->selectRaw('count(idSeccion) as contador')->where([
                     'nrc' => trim($nrc_profesor[0]),
                     'idDocente' => $docente[0]->rut
-                ])->get();
+                ])->first();
+
                 if ($seccion[0]->link_encuesta != 'none') {
                     $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
                     $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
-                    $list_participants = $myJSONRPCClient->list_participants($sessionKey, 732257);
+                    $list_participants = $myJSONRPCClient->list_participants($sessionKey, $sid);
                     $myJSONRPCClient->release_session_key($sessionKey);
                     foreach ($list_participants as $key => $value) {
+
                         if ($value == "No survey participants found.") {
-                            DB::connection('mysql3')->table('seccion_semestres')->where([
-                                'nrc' => trim($nrc_profesor[0]),
-                                'idDocente' => $docente[0]->rut
-                            ])->update([
-                                'link_encuesta' => 'none', 'fecha_inicio_encuesta' => null,
-                                'fecha_termino_encuesta' => null
-                            ]);
+                            if($registro->contador == 1){
+                                DB::connection('mysql3')->table('seccion_semestres')->where([
+                                    'idSeccion' => $seccion[0]->idSeccion
+                                ])->update([
+                                    'link_encuesta' => 'none', 'fecha_inicio_encuesta' => null,
+                                    'fecha_termino_encuesta' => null
+                                ]);
+                            }else{
+                                DB::connection('mysql3')->table('seccion_semestres')->where([
+                                    'idSeccion' => $seccion[0]->idSeccion
+                                ])->delete();
+                            }
                         } elseif ($value == "Error: Invalid survey ID") {
                             return back()->with('error', 'la encuesta no existe');
                         } else {

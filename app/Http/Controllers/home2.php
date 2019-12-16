@@ -27,8 +27,11 @@ class home2 extends Controller
         $periodos = DB::connection('mysql3')->table('periodos')
             ->where('estado', '>', '1')->get()->toArray();
 
-        $this->periodos = $periodos[0]->idPeriodo;
-
+        if (empty($periodos[0]->idPeriodo)) {
+            $this->periodos = '';
+        } else {
+            $this->periodos = $periodos[0]->idPeriodo;
+        }
         $user = Auth::user()->email;
         $tipo = DB::connection('mysql3')->table('users')->where('email', $user)->value('tipo');
 
@@ -48,7 +51,7 @@ class home2 extends Controller
                     'seccion_semestres.fecha_termino_encuesta',
                     'seccion_semestres.actividad',
                     'seccion_semestres.link_encuesta'
-                )->get();
+                )->distinct()->get();
 
             $campus_clinico = DB::connection('mysql3')->table('alumno_seccions')
                 ->join('seccion_semestres', function ($join) {
@@ -127,14 +130,19 @@ class home2 extends Controller
 
             foreach ($surveys_ids as $key => $value) {
                 $list_participants = $myJSONRPCClient->list_participants($sessionKey, $value['id'], 0, 100, false, $attributes, $aConditions);
+
                 if (!isset($list_participants[0])) {
                     continue;
                 } else {
+
+                    if($list_participants[0]['participant_info']['email'] == Auth::user()->email and $list_participants[0]['completed'] == "Y"){
+                        DB::table('alumno_seccions')->where([['rut_alumno','=',$this->rut],['nrc','=',$value['nrc']]])
+                        ->update(['resp_encuesta' => "Y"]);
+                    }
                     $estatus[$count] = ['nrc' => $value['nrc'], 'estado' => $list_participants[0]['completed']];
                     $count++;
                 }
             }
-
             $myJSONRPCClient->release_session_key($sessionKey);
 
             return view('home2', [
@@ -150,7 +158,11 @@ class home2 extends Controller
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '1')->get()->toArray();
 
-            $this->periodos = $periodos[0]->idPeriodo;
+            if (empty($periodos[0]->idPeriodo)) {
+                $this->periodos = '';
+            } else {
+                $this->periodos = $periodos[0]->idPeriodo;
+            }
 
             //datos para docentes
             $this->rut = DB::connection('mysql3')->table('docentes')->where('nombre', Auth::user()->name)->value('rut'); //rut del docente
@@ -271,7 +283,7 @@ class home2 extends Controller
                 ->orderBy('seccion_semestres.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['alumno_seccions.resp_encuesta', '=', 'si']
+                    ['alumno_seccions.resp_encuesta', '=', 'Y']
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -372,8 +384,11 @@ class home2 extends Controller
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '1')->get()->toArray();
 
-            $this->periodos = $periodos[0]->idPeriodo;
-
+            if (empty($periodos[0]->idPeriodo)) {
+                $this->periodos = '';
+            } else {
+                $this->periodos = $periodos[0]->idPeriodo;
+            }
             //datos para docentes
             $this->rut = DB::connection('mysql3')->table('docentes')->where('nombre', Auth::user()->name)->value('rut'); //rut del docente
 
@@ -385,7 +400,7 @@ class home2 extends Controller
                 ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
                 ->orderBy('seccion_semestres.nrc')
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
-                ->select('seccion_semestres.idPeriodo', 'docentes.nombre as doc_nom', 'seccion_semestres.nrc', 'asignaturas.nombre', 'seccion_semestres.actividad', 'seccion_semestres.fecha_inicio_encuesta', 'seccion_semestres.fecha_termino_encuesta')->get();
+                ->select('seccion_semestres.idPeriodo', 'docentes.nombre as doc_nom', 'seccion_semestres.link_encuesta', 'seccion_semestres.nrc', 'asignaturas.nombre', 'seccion_semestres.actividad', 'seccion_semestres.fecha_inicio_encuesta', 'seccion_semestres.fecha_termino_encuesta')->get();
 
             $alumnos_teoricos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
                 $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
@@ -394,6 +409,16 @@ class home2 extends Controller
                 ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
                 ->orderBy('seccion_semestres.nrc')
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+                ->select('seccion_semestres.nrc', 'alumnos.rut', 'alumnos.nombre', 'alumno_seccions.resp_encuesta', 'seccion_semestres.actividad')
+                ->distinct()->get();
+
+            $alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
+                    ->where('seccion_semestres.idDocente', '=', $this->rut);
+            })
+                ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+                ->orderBy('seccion_semestres.nrc')
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
                 ->select('seccion_semestres.nrc', 'alumnos.rut', 'alumnos.nombre', 'alumno_seccions.resp_encuesta', 'seccion_semestres.actividad')->get();
 
             //seccion Alumnos Teoricos
@@ -421,6 +446,20 @@ class home2 extends Controller
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
                 ->distinct()
                 ->get();
+
+            $contador_registros = DB::connection('mysql3')->table('seccion_semestres')
+                ->select(
+                    DB::raw('count(seccion_semestres.nrc) as registros'),
+                    'seccion_semestres.nrc',
+                    'seccion_semestres.actividad',
+                    'seccion_semestres.idDocente',
+                    'seccion_semestres.idPeriodo'
+                )
+                ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
+                ->join('mallas', 'mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                ->whereRaw('mallas.Encuesta = 1 AND asignaturas.actividad = seccion_semestres.actividad')
+                ->groupBy('seccion_semestres.nrc', 'seccion_semestres.actividad', 'seccion_semestres.idDocente', 'seccion_semestres.idPeriodo')
+                ->distinct('seccion_semestres.actividad')->get();
 
             //seccion Alumnos campus clinicos
             $contador_alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')
@@ -576,6 +615,7 @@ class home2 extends Controller
                     'campus_seccions.nrc'
                 )->get();
 
+
             //dd($asignatura,$alumnos_teoricos,Auth::user());
             //dd($contador_alumnos_clinicos);
             //dd($campus_clinico,$alumnos_clinicos,$docentes_clinicos,$contador_rotaciones,$rotaciones);
@@ -587,7 +627,9 @@ class home2 extends Controller
             return view('home2', [
                 'tipo' => $tipo,
                 'periodos' => $periodos,
+                'contador_registros' => $contador_registros,
                 'alumnos_teoricos' => $alumnos_teoricos,
+                'alumnos_clinicos' => $alumnos_clinicos,
                 'code_periodo' => $this->periodos,
                 'asignaturas' => $asignatura,
                 'cantidad_teoricos' => $contador_alumnos,
@@ -606,9 +648,17 @@ class home2 extends Controller
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '0')->get()->toArray();
 
-            $this->periodos = $periodos[0]->idPeriodo;
+            if (empty($periodos[0]->idPeriodo)) {
+                $this->periodos = '';
+            } else {
+                $this->periodos = $periodos[0]->idPeriodo;
+            }
+            //Para usuarios con mas de una carrera
+            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
+                ->select('carreras.nombre', 'carreras.idCarrera')
+                ->where('idUser', '=', Auth::user()->id)->get();
 
-            //Asignaturas Teoricas
+            $code_carrera = $carreras[0]->idCarrera;
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
 
                 ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
@@ -618,17 +668,32 @@ class home2 extends Controller
                 })
                 ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
                 ->orderBy('seccion_semestres.nrc')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '=', '']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '=', ''], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(
                     'seccion_semestres.idPeriodo',
                     'docentes.nombre as doc_nom',
                     'seccion_semestres.nrc',
                     'asignaturas.nombre',
+                    'seccion_semestres.link_encuesta',
                     'seccion_semestres.actividad',
                     'seccion_semestres.fecha_inicio_encuesta',
                     'seccion_semestres.fecha_termino_encuesta'
                 )
                 ->distinct()->get();
+
+            $alumnos_teoricos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+            })
+                ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+                ->orderBy('seccion_semestres.nrc')
+                ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+                ->select(
+                    'seccion_semestres.nrc',
+                    'alumnos.rut',
+                    'alumnos.nombre',
+                    'alumno_seccions.resp_encuesta',
+                    'seccion_semestres.actividad'
+                )->distinct()->get();
 
             $contador_alumnos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
                 $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
@@ -638,15 +703,26 @@ class home2 extends Controller
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
                 ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
 
-            $respuestas_teoricas = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
-                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
-            })
+            $contador_registros = DB::connection('mysql3')->table('seccion_semestres')
+                ->select(
+                    DB::raw('count(seccion_semestres.nrc) as registros'),
+                    'seccion_semestres.nrc',
+                    'seccion_semestres.actividad',
+                    'seccion_semestres.idDocente',
+                    'seccion_semestres.idPeriodo'
+                )
+                ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
+                ->join('mallas', 'mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                ->whereRaw('mallas.Encuesta = 1 AND asignaturas.actividad = seccion_semestres.actividad')
+                ->groupBy('seccion_semestres.nrc', 'seccion_semestres.actividad', 'seccion_semestres.idDocente', 'seccion_semestres.idPeriodo')
+                ->distinct('seccion_semestres.actividad')->get();
+
+            $respuestas_teoricas = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'seccion_semestres.nrc','=','alumno_seccions.nrc')
                 ->groupBy('seccion_semestres.actividad', 'seccion_semestres.nrc')
                 ->orderBy('seccion_semestres.nrc')
-                ->where([
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['alumno_seccions.resp_encuesta', '=', 'si']
-                ])
+                ->whereRaw('seccion_semestres.idDocente = alumno_seccions.idDocente
+                AND alumno_seccions.resp_encuesta = "Y" AND seccion_semestres.idPeriodo = '.$this->periodos)
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
                     'seccion_semestres.nrc',
@@ -665,7 +741,8 @@ class home2 extends Controller
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
                 ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre as nombre_asignatura')
-                ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]])
+                ->orderBy('seccion_semestres.nrc')
                 ->distinct()
                 ->get();
 
@@ -673,16 +750,24 @@ class home2 extends Controller
                 ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->groupBy('seccion_semestres.nrc')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
 
 
             $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
-                ->groupBy('asignaturas.Liga')
+                ->join('mallas', function ($join) {
+                    $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                        ->where([
+                            ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                            ['asignaturas.actividad', 'like', '%TEO%']
+                        ])
+                        ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+                })
+                ->groupBy('asignaturas.Liga', 'seccion_semestres.nrc')
                 ->orderBy('asignaturas.Liga')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
-                ->select(DB::raw('count(distinct(seccion_semestres.idDocente)) as cant_profesor'), 'asignaturas.Liga')->get();
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]])
+                ->select(DB::raw('count(distinct(seccion_semestres.idDocente)) as cant_profesor'), 'asignaturas.Liga', 'seccion_semestres.nrc')->get();
 
             $respuestas_clinicas = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
@@ -697,10 +782,30 @@ class home2 extends Controller
                     'seccion_semestres.nrc'
                 )->get();
 
+            $alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+            })
+                ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+                ->orderBy('seccion_semestres.nrc')
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
+                ->select('seccion_semestres.nrc', 'alumnos.rut', 'alumnos.nombre', 'alumno_seccions.resp_encuesta', 'seccion_semestres.actividad')->get();
+
+            $docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
+                ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+                ->join('mallas', function ($join) {
+                    $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                        ->where([
+                            ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                            ['asignaturas.actividad', 'like', '%TEO%']
+                        ])
+                        ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+                })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+                ->select('seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.idDocente')->distinct()->get();
+
             $rotaciones = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->groupBy(
                     'asignaturas.actividad',
                     'seccion_semestres.idPeriodo',
@@ -735,7 +840,8 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
+                    ['asignaturas.idCarrera', '=', $code_carrera]
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -746,7 +852,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.Liga', '!=', ''],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
@@ -762,7 +868,8 @@ class home2 extends Controller
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
 
-
+            //dd($contador_docentes_clinicos,$contador_alumnos);
+            //dd($contador_docentes_clinicos,$campus_clinico);
             //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
             //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
             //dd($asignaturas,$contador_alumnos,$respuestas_teoricas);
@@ -771,11 +878,15 @@ class home2 extends Controller
             return view('home2', [
                 'tipo' => $tipo,
                 'periodos' => $periodos,
+                'carreras' => $carreras,
+                'code_carrera' => $code_carrera,
                 'code_periodo' => $this->periodos,
                 'asignaturas' => $asignaturas,
-
+                'alumnos_teoricos' => $alumnos_teoricos,
+                'alumnos_clinicos' => $alumnos_clinicos,
+                'contador_registros' => $contador_registros,
                 'cantidad_teoricos' => $contador_alumnos,
-
+                'docentes_clinicos' => $docentes_clinicos,
                 'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
                 'campus_clinico' => $campus_clinico,
                 'contador_alumnos_rotacion' => $contador_alumnos_rotacion,
@@ -791,8 +902,17 @@ class home2 extends Controller
 
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '0')->get()->toArray();
+            if (empty($periodos[0]->idPeriodo)) {
+                $this->periodos = '';
+            } else {
+                $this->periodos = $periodos[0]->idPeriodo;
+            }
+            //Para usuarios con mas de una carrera
+            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
+                ->select('carreras.nombre', 'carreras.idCarrera')
+                ->where('idUser', '=', Auth::user()->id)->get();
 
-            $this->periodos = $periodos[0]->idPeriodo;
+            $code_carrera = $carreras[0]->idCarrera;
 
             //Asignaturas Teoricas
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
@@ -804,17 +924,32 @@ class home2 extends Controller
                 })
                 ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
                 ->orderBy('seccion_semestres.nrc')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '=', '']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '=', ''], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(
                     'seccion_semestres.idPeriodo',
                     'docentes.nombre as doc_nom',
                     'seccion_semestres.nrc',
                     'asignaturas.nombre',
+                    'seccion_semestres.link_encuesta',
                     'seccion_semestres.actividad',
                     'seccion_semestres.fecha_inicio_encuesta',
                     'seccion_semestres.fecha_termino_encuesta'
                 )
                 ->distinct()->get();
+
+            $alumnos_teoricos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+            })
+                ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+                ->orderBy('seccion_semestres.nrc')
+                ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+                ->select(
+                    'seccion_semestres.nrc',
+                    'alumnos.rut',
+                    'alumnos.nombre',
+                    'alumno_seccions.resp_encuesta',
+                    'seccion_semestres.actividad'
+                )->distinct()->get();
 
             $contador_alumnos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
                 $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
@@ -824,6 +959,20 @@ class home2 extends Controller
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
                 ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
 
+            $contador_registros = DB::connection('mysql3')->table('seccion_semestres')
+                ->select(
+                    DB::raw('count(seccion_semestres.nrc) as registros'),
+                    'seccion_semestres.nrc',
+                    'seccion_semestres.actividad',
+                    'seccion_semestres.idDocente',
+                    'seccion_semestres.idPeriodo'
+                )
+                ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
+                ->join('mallas', 'mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                ->whereRaw('mallas.Encuesta = 1 AND asignaturas.actividad = seccion_semestres.actividad')
+                ->groupBy('seccion_semestres.nrc', 'seccion_semestres.actividad', 'seccion_semestres.idDocente', 'seccion_semestres.idPeriodo')
+                ->distinct('seccion_semestres.actividad')->get();
+
             $respuestas_teoricas = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
                 $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
             })
@@ -831,7 +980,8 @@ class home2 extends Controller
                 ->orderBy('seccion_semestres.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['alumno_seccions.resp_encuesta', '=', 'si']
+                    ['alumno_seccions.resp_encuesta', '=', 'si'],
+
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -851,7 +1001,8 @@ class home2 extends Controller
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
                 ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre as nombre_asignatura')
-                ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]])
+                ->orderBy('seccion_semestres.nrc')
                 ->distinct()
                 ->get();
 
@@ -859,15 +1010,24 @@ class home2 extends Controller
                 ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->groupBy('seccion_semestres.nrc')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
 
 
             $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
-                ->groupBy('seccion_semestres.nrc')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
-                ->select(DB::raw('count(distinct(seccion_semestres.idDocente)) as cant_profesor'), 'seccion_semestres.nrc')->get();
+                ->join('mallas', function ($join) {
+                    $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                        ->where([
+                            ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                            ['asignaturas.actividad', 'like', '%TEO%']
+                        ])
+                        ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+                })
+                ->groupBy('asignaturas.Liga', 'seccion_semestres.nrc')
+                ->orderBy('asignaturas.Liga')
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]])
+                ->select(DB::raw('count(distinct(seccion_semestres.idDocente)) as cant_profesor'), 'asignaturas.Liga', 'seccion_semestres.nrc')->get();
 
             $respuestas_clinicas = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
@@ -882,10 +1042,30 @@ class home2 extends Controller
                     'seccion_semestres.nrc'
                 )->get();
 
+            $alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+                $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+            })
+                ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+                ->orderBy('seccion_semestres.nrc')
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
+                ->select('seccion_semestres.nrc', 'alumnos.rut', 'alumnos.nombre', 'alumno_seccions.resp_encuesta', 'seccion_semestres.actividad')->get();
+
+            $docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
+                ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+                ->join('mallas', function ($join) {
+                    $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                        ->where([
+                            ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                            ['asignaturas.actividad', 'like', '%TEO%']
+                        ])
+                        ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+                })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+                ->select('seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.idDocente')->distinct()->get();
+
             $rotaciones = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
-                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%']])
+                ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->groupBy(
                     'asignaturas.actividad',
                     'seccion_semestres.idPeriodo',
@@ -914,14 +1094,14 @@ class home2 extends Controller
                 ->groupBy('alumno_seccions.nrc')
                 ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_alumno'), 'alumno_seccions.nrc')->get();
 
-
             $respuestas_rotaciones = DB::connection('mysql3')->table('seccion_semestres')
-                > join('alumno_seccions', 'alumno_seccions.nrc', '=', 'seccion_semestres.nrc')
+                ->join('alumno_seccions', 'alumno_seccions.nrc', '=', 'seccion_semestres.nrc')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
+                    ['asignaturas.idCarrera', '=', $code_carrera]
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -932,7 +1112,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.Liga', '!=', ''],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
@@ -948,21 +1128,27 @@ class home2 extends Controller
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
 
+            //dd($contador_docentes_clinicos,$contador_alumnos);
+            //dd($contador_docentes_clinicos,$campus_clinico);
             //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
             //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
             //dd($asignaturas,$contador_alumnos,$respuestas_teoricas);
+            //dd($campus_clinico,$rotaciones,$contador_alumnos_clinicos,$contador_docentes_clinicos);
 
             return view('home2', [
                 'tipo' => $tipo,
                 'periodos' => $periodos,
+                'carreras' => $carreras,
+                'code_carrera' => $code_carrera,
                 'code_periodo' => $this->periodos,
                 'asignaturas' => $asignaturas,
-
+                'alumnos_teoricos' => $alumnos_teoricos,
+                'alumnos_clinicos' => $alumnos_clinicos,
+                'contador_registros' => $contador_registros,
                 'cantidad_teoricos' => $contador_alumnos,
-
+                'docentes_clinicos' => $docentes_clinicos,
                 'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
                 'campus_clinico' => $campus_clinico,
-
                 'contador_alumnos_rotacion' => $contador_alumnos_rotacion,
                 'contador_docentes_clinicos' => $contador_docentes_clinicos,
                 'rotaciones' => $rotaciones,
@@ -1424,5 +1610,271 @@ class home2 extends Controller
         $myJSONRPCClient->release_session_key($sessionKey);
 
         return redirect()->away('http://' . $url);
+    }
+    public function carreras_SA($id)
+    {
+        $tipo = Auth::user()->tipo;
+        $periodos = DB::connection('mysql3')->table('periodos')
+            ->where('estado', '>', '0')->get()->toArray();
+        if (empty($periodos[0]->idPeriodo)) {
+            $this->periodos = '';
+        } else {
+            $this->periodos = $periodos[0]->idPeriodo;
+        }
+        //Para usuarios con mas de una carrera
+        $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
+            ->select('carreras.nombre', 'carreras.idCarrera')
+            ->where('idUser', '=', Auth::user()->id)->get();
+
+        //Asignaturas Teoricas
+        $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
+
+            ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
+            ->join('mallas', function ($join) {
+                $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                    ->where('mallas.Encuesta', '=', 1);
+            })
+            ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->orderBy('seccion_semestres.nrc')
+            ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '=', ''], ['asignaturas.idCarrera', '=', $id]])
+            ->select(
+                'seccion_semestres.idPeriodo',
+                'docentes.nombre as doc_nom',
+                'seccion_semestres.nrc',
+                'asignaturas.nombre',
+                'seccion_semestres.link_encuesta',
+                'seccion_semestres.actividad',
+                'seccion_semestres.fecha_inicio_encuesta',
+                'seccion_semestres.fecha_termino_encuesta'
+            )
+            ->distinct()->get();
+
+        $alumnos_teoricos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+            $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+        })
+            ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+            ->orderBy('seccion_semestres.nrc')
+            ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+            ->select(
+                'seccion_semestres.nrc',
+                'alumnos.rut',
+                'alumnos.nombre',
+                'alumno_seccions.resp_encuesta',
+                'seccion_semestres.actividad'
+            )->distinct()->get();
+
+        $contador_alumnos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+            $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+        })
+            ->groupBy('seccion_semestres.actividad', 'seccion_semestres.nrc')
+            ->orderBy('seccion_semestres.nrc')
+            ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
+            ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
+
+        $contador_registros = DB::connection('mysql3')->table('seccion_semestres')
+            ->select(
+                DB::raw('count(seccion_semestres.nrc) as registros'),
+                'seccion_semestres.nrc',
+                'seccion_semestres.actividad',
+                'seccion_semestres.idDocente',
+                'seccion_semestres.idPeriodo'
+            )
+            ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
+            ->join('mallas', 'mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+            ->whereRaw('mallas.Encuesta = 1 AND asignaturas.actividad = seccion_semestres.actividad')
+            ->groupBy('seccion_semestres.nrc', 'seccion_semestres.actividad', 'seccion_semestres.idDocente', 'seccion_semestres.idPeriodo')
+            ->distinct('seccion_semestres.actividad')->get();
+
+        $respuestas_teoricas = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+            $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+        })
+            ->groupBy('seccion_semestres.actividad', 'seccion_semestres.nrc')
+            ->orderBy('seccion_semestres.nrc')
+            ->where([
+                ['seccion_semestres.idPeriodo', '=', $this->periodos],
+                ['alumno_seccions.resp_encuesta', '=', 'si'],
+
+            ])
+            ->select(
+                DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
+                'seccion_semestres.nrc',
+                'seccion_semestres.actividad'
+            )->get();
+
+        //datos Campus clinico Docente
+        $campus_clinico = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->join('mallas', function ($join) {
+                $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                    ->where([
+                        ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                        ['asignaturas.actividad', 'like', '%TEO%']
+                    ])
+                    ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+            })
+            ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre as nombre_asignatura')
+            ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $id]])
+            ->orderBy('seccion_semestres.nrc')
+            ->distinct()
+            ->get();
+
+        $contador_alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->groupBy('seccion_semestres.nrc')
+            ->where([
+                ['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'],
+                ['asignaturas.idCarrera', '=', $id]
+            ])
+            ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
+
+
+        $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->join('mallas', function ($join) {
+                $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                    ->where([
+                        ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                        ['asignaturas.actividad', 'like', '%TEO%']
+                    ])
+                    ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+            })
+            ->groupBy('asignaturas.Liga', 'seccion_semestres.nrc')
+            ->orderBy('asignaturas.Liga')
+            ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $id]])
+            ->select(DB::raw('count(distinct(seccion_semestres.idDocente)) as cant_profesor'), 'asignaturas.Liga', 'seccion_semestres.nrc')->get();
+
+        $respuestas_clinicas = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
+            ->groupBy('seccion_semestres.nrc')
+            ->where([
+                ['seccion_semestres.idPeriodo', '=', $this->periodos],
+                ['alumno_seccions.resp_encuesta', '=', 'si'],
+                ['seccion_semestres.actividad', 'like', '%ROTACION%']
+            ])
+            ->select(
+                DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
+                'seccion_semestres.nrc'
+            )->get();
+
+        $alumnos_clinicos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
+            $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
+        })
+            ->join('alumnos', 'alumno_seccions.rut_alumno', '=', 'alumnos.rut')
+            ->orderBy('seccion_semestres.nrc')
+            ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%']])
+            ->select('seccion_semestres.nrc', 'alumnos.rut', 'alumnos.nombre', 'alumno_seccions.resp_encuesta', 'seccion_semestres.actividad')->get();
+
+        $docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->join('mallas', function ($join) {
+                $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                    ->where([
+                        ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
+                        ['asignaturas.actividad', 'like', '%TEO%']
+                    ])
+                    ->orWhere('asignaturas.actividad', 'like', '%CLI%');
+            })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->select('seccion_semestres.nrc', 'docentes.nombre', 'seccion_semestres.idDocente')->distinct()->get();
+
+        $rotaciones = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
+            ->where([
+                ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%'],
+                ['asignaturas.idCarrera', '=', $id]
+            ])
+            ->groupBy(
+                'asignaturas.actividad',
+                'seccion_semestres.idPeriodo',
+                'seccion_semestres.nrc',
+                'asignaturas.nombre',
+                'seccion_semestres.fecha_inicio_encuesta',
+                'seccion_semestres.fecha_termino_encuesta',
+                'docentes.nombre',
+                'asignaturas.Liga'
+            )
+
+            ->select(
+                'asignaturas.actividad',
+                'seccion_semestres.idPeriodo',
+                'seccion_semestres.nrc',
+                'asignaturas.nombre as nombre_asignatura',
+                'seccion_semestres.fecha_inicio_encuesta',
+                'seccion_semestres.fecha_termino_encuesta',
+                'docentes.nombre',
+                'asignaturas.Liga'
+            )->distinct()->orderBy('asignaturas.Liga')->get();
+
+        $contador_alumnos_rotacion = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
+            ->where('seccion_semestres.actividad', 'like', '%ROTACION%')
+            ->groupBy('alumno_seccions.nrc')
+            ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_alumno'), 'alumno_seccions.nrc')->get();
+
+        $respuestas_rotaciones = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'alumno_seccions.nrc', '=', 'seccion_semestres.nrc')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->where([
+                ['alumno_seccions.entrega_rubrica', '=', 1],
+                ['asignaturas.actividad', 'like', '%ROTACION%'],
+                ['seccion_semestres.idPeriodo', '=', $this->periodos],
+                ['asignaturas.idCarrera', '=', $id]
+            ])
+            ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
+            ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
+
+        $entregas_rubrica = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'alumno_seccions.nrc', '=', 'seccion_semestres.nrc')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->where([
+                ['alumno_seccions.entrega_rubrica', '=', 1],
+                ['asignaturas.Liga', '!=', ''],
+                ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $id]
+            ])
+            ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
+            ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
+
+        $rotaciones_rubrica = DB::connection('mysql3')->table('seccion_semestres')
+            ->join('alumno_seccions', 'alumno_seccions.nrc', '=', 'seccion_semestres.nrc')
+            ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
+            ->where([
+                ['alumno_seccions.entrega_rubrica', '=', 1],
+                ['asignaturas.actividad', 'like', '%ROTACION%'],
+                ['seccion_semestres.idPeriodo', '=', $this->periodos]
+            ])
+            ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
+            ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
+
+        //dd($contador_docentes_clinicos,$contador_alumnos);
+        //dd($contador_docentes_clinicos,$campus_clinico);
+        //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
+        //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
+        //dd($asignaturas,$contador_alumnos,$respuestas_teoricas);
+        //dd($campus_clinico,$rotaciones,$contador_alumnos_clinicos,$contador_docentes_clinicos);
+
+        return view('home2', [
+            'tipo' => $tipo,
+            'periodos' => $periodos,
+            'carreras' => $carreras,
+            'code_carrera' => $id,
+            'code_periodo' => $this->periodos,
+            'asignaturas' => $asignaturas,
+            'alumnos_teoricos' => $alumnos_teoricos,
+            'alumnos_clinicos' => $alumnos_clinicos,
+            'contador_registros' => $contador_registros,
+            'cantidad_teoricos' => $contador_alumnos,
+            'docentes_clinicos' => $docentes_clinicos,
+            'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
+            'campus_clinico' => $campus_clinico,
+            'contador_alumnos_rotacion' => $contador_alumnos_rotacion,
+            'contador_docentes_clinicos' => $contador_docentes_clinicos,
+            'rotaciones' => $rotaciones,
+            'respuestas_teoricas' => $respuestas_teoricas,
+            'respuestas_clinicas' => $respuestas_clinicas,
+            'respuestas_rotaciones' => $respuestas_rotaciones,
+            'entrego_rubrica' => $entregas_rubrica,
+            'rotaciones_rubrica' => $rotaciones_rubrica
+        ]);
     }
 }
